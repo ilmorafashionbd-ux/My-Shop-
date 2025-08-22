@@ -1,1 +1,120 @@
- 
+:root{
+  --primary:#0b1424;
+  --text:#222;
+  --muted:#666;
+  --accent:#007bff;
+  --bg:#f6f7fb;
+  --white:#fff;
+  --font:'Roboto',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font);
+  color:var(--text);
+  background:var(--bg);
+  line-height:1.6;
+}
+
+/* header */
+.header{
+  background:var(--white);
+  padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  position:sticky;top:0;z-index:10;
+}
+.logo img{height:44px;display:block}
+.nav a{
+  color:var(--muted);text-decoration:none;margin-left:18px;
+  font-weight:600
+}
+.nav a.active,.nav a:hover{color:var(--accent)}
+
+/* banner */
+.banner{position:relative;overflow:hidden}
+.banner-bg{
+  width:100%;height:360px;object-fit:cover;display:block;
+  filter:brightness(.85)
+}
+.banner-content{
+  position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+  color:#fff;padding:20px
+}
+.banner-content h1{font-size:2.2rem;margin-bottom:.4rem}
+.banner-content p{opacity:.95;margin-bottom:1rem}
+.btn{
+  display:inline-block;background:var(--accent);color:#fff;border-radius:8px;
+  padding:10px 16px;text-decoration:none;border:none;cursor:pointer;font-weight:700
+}
+.btn:hover{filter:brightness(.95)}
+
+/* sections */
+section{padding:32px 16px}
+.featured-products h2,
+.contact-form-section h2{text-align:center;margin-bottom:18px}
+
+/* grids */
+.maxwrap{max-width:1200px;margin:0 auto;padding:0 10px}
+.product-grid{
+  display:grid;gap:18px;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  max-width:1200px;margin:0 auto;
+}
+.product-card{
+  background:var(--white);border-radius:12px;overflow:hidden;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  transition:transform .18s ease, box-shadow .18s ease;
+  text-decoration:none;color:inherit
+}
+.product-card:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,.12)}
+.product-card img{width:100%;height:220px;object-fit:cover;display:block}
+.product-card-content{padding:12px 14px}
+.product-card h3{font-size:1.05rem;margin-bottom:4px}
+.product-card p{font-weight:700;color:var(--accent)}
+
+/* toolbar */
+.toolbar{display:flex;justify-content:center;padding:18px}
+.toolbar input{
+  width:min(680px,92%);padding:10px 12px;border-radius:10px;border:1px solid #d9dbe9;
+  outline:none
+}
+
+/* detail */
+.product-detail{max-width:1000px;margin:0 auto;padding:28px 16px}
+.product-detail-container{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+.product-detail-image{width:min(520px,100%);border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.product-detail-content{flex:1;min-width:260px}
+.product-detail-content h1{font-size:2rem;margin-bottom:8px}
+.product-detail-content .price{font-size:1.6rem;color:var(--accent);font-weight:800;margin-bottom:12px}
+.product-detail-content .description{color:var(--muted);margin-bottom:16px}
+
+/* forms */
+.contact-form-section{max-width:760px;margin:0 auto}
+.contact-form{background:var(--white);padding:18px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.06)}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-weight:700;margin-bottom:6px}
+.form-group input,.form-group textarea{
+  width:100%;padding:10px;border:1px solid #d9dbe9;border-radius:10px;outline:none
+}
+
+/* modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;align-items:center;justify-content:center}
+.modal-content{
+  background:#fff;border-radius:12px;max-width:520px;width:92%;padding:18px;position:relative;
+  animation:fade .2s ease
+}
+.close-btn{position:absolute;right:14px;top:8px;font-size:26px;color:#888;cursor:pointer}
+.close-btn:hover{color:#333}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* footer */
+.footer{background:var(--primary);color:#fff;text-align:center;padding:18px;margin-top:24px}
+
+/* responsive */
+@media (max-width:768px){
+  .banner-bg{height:260px}
+  .banner-content h1{font-size:1.7rem}
+  .product-card img{height:200px}
+}
