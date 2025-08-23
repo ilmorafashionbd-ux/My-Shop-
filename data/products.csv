@@ -1,8 +1,0 @@
-id,name,price,discount_price,delivery_fee,image,description,color
-1,Polo Shirt,400,350,60,images/product_1.jpg,Comfortable cotton polo shirt perfect for casual wear আমাদের এই পোশাক👗 গরম,শীত সবসময়ই পড়তে পারবেন। সাইজ :(M, L, XL).,#1E90FF
-2,T-Shirt,350,300,50,images/product_2.jpg,High-quality cotton t-shirt with modern design. স্টাইলিশ এবং আরামদায়ক।,#FF6347
-3,Shirt,500,450,70,images/product_3.jpg,Formal shirt suitable for office and business meetings. অফিস বা মিটিং এর জন্য পারফেক্ট।,#228B22
-4,Jeans,750,700,80,images/product_4.jpg,Stylish slim-fit jeans for everyday use. দৈনন্দিন ব্যবহারের জন্য চমৎকার।,#8B4513
-5,Shoes,1200,1100,100,images/product_5.jpg,Durable and fashionable shoes for all occasions. স্থায়ী এবং ফ্যাশনেবল।,#FFD700
-6,Jacket,1500,1400,120,images/product_6.jpg,Warm and stylish jacket, perfect for winter. শীতের জন্য আদর্শ।,#2F4F4F
-7,Cap,200,180,30,images/product_7.jpg,Trendy cap for sun protection and casual style. স্টাইলিশ ক্যাপ।,#FF69B4
