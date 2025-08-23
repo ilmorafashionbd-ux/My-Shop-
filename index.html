@@ -1,42 +1,115 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>আমার ডেমো শপ</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>প্রডাক্ট কার্ড ডেমো</title>
+<style>
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    margin: 20px;
+}
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 250px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+.card-body {
+    padding: 15px;
+}
+.card-body h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #333;
+}
+.card-body p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+.price {
+    font-weight: bold;
+    font-size: 16px;
+    color: #1E90FF;
+}
+.discount-price {
+    text-decoration: line-through;
+    color: #888;
+    margin-left: 10px;
+}
+.delivery {
+    font-size: 13px;
+    color: #ff6347;
+}
+.button {
+    display: block;
+    text-align: center;
+    background-color: #1E90FF;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+.button:hover {
+    background-color: #0d6efd;
+}
+</style>
 </head>
 <body>
-  <header class="header">
-    <a href="index.html" class="logo">
-      <img src="./images/logo.png" alt="Logo">
-    </a>
-    <nav class="nav">
-      <a href="index.html">হোম</a>
-      <a href="products.html">সব পণ্য</a>
-      <a href="contact.html">কন্টাক্ট</a>
-    </nav>
-  </header>
 
-  <section class="banner">
-    <div class="banner-content">
-      <h1>Fresh Styles, Great Prices</h1>
-      <p>নতুন কালেকশন থেকে পছন্দ করুন</p>
-      <a href="products.html" class="btn">Shop Now</a>
+<div class="container">
+
+  <div class="card" style="border-top: 5px solid #1E90FF;">
+    <img src="images/product_1.jpg" alt="Polo Shirt">
+    <div class="card-body">
+      <h3>Polo Shirt</h3>
+      <p>Comfortable cotton polo shirt perfect for casual wear আমাদের এই পোশাক👗 গরম,শীত সবসময়ই পড়তে পারবেন। সাইজ :(M, L, XL).</p>
+      <div>
+        <span class="price">350 BDT</span>
+        <span class="discount-price">400 BDT</span>
+      </div>
+      <div class="delivery">Delivery Fee: 60 BDT</div>
+      <a href="#" class="button">Add to Cart</a>
     </div>
-    <img class="banner-bg" src="./images/banner.jpg" alt="Banner">
-  </section>
+  </div>
 
-  <section class="featured-products">
-    <h2>ফিচার্ড পণ্য</h2>
-    <div id="featured-products-grid" class="product-grid"></div>
-  </section>
+  <div class="card" style="border-top: 5px solid #FF6347;">
+    <img src="images/product_2.jpg" alt="T-Shirt">
+    <div class="card-body">
+      <h3>T-Shirt</h3>
+      <p>High-quality cotton t-shirt with modern design. স্টাইলিশ এবং আরামদায়ক।</p>
+      <div>
+        <span class="price">300 BDT</span>
+        <span class="discount-price">350 BDT</span>
+      </div>
+      <div class="delivery">Delivery Fee: 50 BDT</div>
+      <a href="#" class="button">Add to Cart</a>
+    </div>
+  </div>
 
-  <footer class="footer">
-    <p>© <span id="yr"></span> আমার ডেমো শপ</p>
-  </footer>
+  <!-- অন্য প্রডাক্টগুলো একইভাবে এড করুন -->
 
-  <script src="script.js"></script>
+</div>
+
 </body>
 </html>
