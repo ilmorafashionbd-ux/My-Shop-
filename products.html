@@ -1,35 +1,36 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>সব পণ্য — আমার ডেমো শপ</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>All Products - Fashion BD</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="header">
-    <a href="index.html" class="logo">
-      <img src="./images/logo.png" alt="Logo">
-    </a>
-    <nav class="nav">
-      <a href="index.html">হোম</a>
-      <a class="active" href="products.html">সব পণ্য</a>
-      <a href="contact.html">কন্টাক্ট</a>
-    </nav>
-  </header>
+    <!-- Header -->
+    <header class="header">
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="Fashion BD">
+        </a>
+        <nav class="nav">
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+    </header>
 
-  <section class="toolbar">
-    <input id="search" type="search" placeholder="পণ্য সার্চ করুন..." />
-  </section>
+    <!-- All Products Section -->
+    <section class="products">
+        <h2>Our Products</h2>
+        <div id="all-products-grid" class="product-grid">
+            <!-- Products will be loaded here from products.csv -->
+        </div>
+    </section>
 
-  <main class="maxwrap">
-    <div id="all-products-grid" class="product-grid"></div>
-  </main>
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Fashion BD. All rights reserved.</p>
+    </footer>
 
-  <footer class="footer">
-    <p>© <span id="yr"></span> আমার ডেমো শপ</p>
-  </footer>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
