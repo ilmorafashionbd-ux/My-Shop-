@@ -1,115 +1,176 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>প্রডাক্ট কার্ড ডেমো</title>
-<style>
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f5f5f5;
-    margin: 20px;
-}
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-.card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    width: 250px;
-    overflow: hidden;
-    transition: transform 0.2s;
-}
-.card:hover {
-    transform: translateY(-5px);
-}
-.card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
-.card-body {
-    padding: 15px;
-}
-.card-body h3 {
-    margin: 0 0 10px 0;
-    font-size: 18px;
-    color: #333;
-}
-.card-body p {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 10px;
-}
-.price {
-    font-weight: bold;
-    font-size: 16px;
-    color: #1E90FF;
-}
-.discount-price {
-    text-decoration: line-through;
-    color: #888;
-    margin-left: 10px;
-}
-.delivery {
-    font-size: 13px;
-    color: #ff6347;
-}
-.button {
-    display: block;
-    text-align: center;
-    background-color: #1E90FF;
-    color: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    text-decoration: none;
-    margin-top: 10px;
-    transition: background-color 0.2s;
-}
-.button:hover {
-    background-color: #0d6efd;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রিমিয়াম প্লাস বিডি - আপনার বিশ্বস্ত অর্গানিক শপ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="https://i.ibb.co/Vt7p1gC/logo.png" alt="Premium Plus BD Logo">
+                <span>প্রিমিয়াম প্লাস</span>
+            </a>
+            <nav class="navbar">
+                <a href="#home">হোম</a>
+                <a href="#products">শপ</a>
+                <a href="#footer">যোগাযোগ</a>
+                <a href="#">রিটার্ন পলিসি</a>
+            </nav>
+            <div class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">0</span>
+            </div>
+            <div class="menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
 
-  <div class="card" style="border-top: 5px solid #1E90FF;">
-    <img src="images/product_1.jpg" alt="Polo Shirt">
-    <div class="card-body">
-      <h3>Polo Shirt</h3>
-      <p>Comfortable cotton polo shirt perfect for casual wear আমাদের এই পোশাক👗 গরম,শীত সবসময়ই পড়তে পারবেন। সাইজ :(M, L, XL).</p>
-      <div>
-        <span class="price">350 BDT</span>
-        <span class="discount-price">400 BDT</span>
-      </div>
-      <div class="delivery">Delivery Fee: 60 BDT</div>
-      <a href="#" class="button">Add to Cart</a>
-    </div>
-  </div>
+    <!-- Main Content -->
+    <main>
+        <!-- Banner Section -->
+        <section id="home" class="banner">
+            <img src="https://ilmorafashionbd-ux.github.io/My-Shop-/images/banner.jpg" alt="Website Banner">
+        </section>
 
-  <div class="card" style="border-top: 5px solid #FF6347;">
-    <img src="images/product_2.jpg" alt="T-Shirt">
-    <div class="card-body">
-      <h3>T-Shirt</h3>
-      <p>High-quality cotton t-shirt with modern design. স্টাইলিশ এবং আরামদায়ক।</p>
-      <div>
-        <span class="price">300 BDT</span>
-        <span class="discount-price">350 BDT</span>
-      </div>
-      <div class="delivery">Delivery Fee: 50 BDT</div>
-      <a href="#" class="button">Add to Cart</a>
-    </div>
-  </div>
+        <!-- Category Section -->
+        <section class="categories">
+            <div class="container">
+                <h2 class="section-title">পণ্যের ক্যাটাগরি</h2>
+                <div class="category-grid">
+                    <div class="category-item">
+                        <i class="fas fa-seedling"></i>
+                        <span>সিডস</span>
+                    </div>
+                    <div class="category-item">
+                        <i class="fas fa-cookie-bite"></i>
+                        <span>বেকারি</span>
+                    </div>
+                    <div class="category-item">
+                        <i class="fas fa-pepper-hot"></i>
+                        <span>মসলা</span>
+                    </div>
+                     <div class="category-item">
+                        <i class="fas fa-leaf"></i>
+                        <span>অর্গানিক</span>
+                    </div>
+                    <div class="category-item">
+                        <i class="fas fa-candy-cane"></i>
+                        <span>খেজুর</span>
+                    </div>
+                    <div class="category-item">
+                        <i class="fas fa-utensils"></i>
+                        <span>ফাস্ট ফুড</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  <!-- অন্য প্রডাক্টগুলো একইভাবে এড করুন -->
+        <!-- Products Section -->
+        <section id="products" class="products">
+            <div class="container">
+                <h2 class="section-title">আমাদের সকল প্রোডাক্ট</h2>
+                <div id="product-grid" class="product-grid">
+                    <!-- Products will be loaded here by JavaScript -->
+                </div>
+            </div>
+        </section>
 
-</div>
+        <!-- Product Detail Modal -->
+        <div id="product-detail-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <div id="product-detail-content">
+                    <!-- Product details will be injected here -->
+                </div>
+                <div id="related-products" class="related-products">
+                     <h3>Related Products</h3>
+                     <div id="related-products-grid" class="product-grid">
+                         <!-- Related products will be loaded here -->
+                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Form Modal -->
+        <div id="order-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn order-close-btn">&times;</span>
+                <h2>অর্ডার কনফার্ম করুন</h2>
+                <form id="order-form">
+                    <input type="hidden" id="product-name-input">
+                    <div class="form-group">
+                        <label for="customer-name">আপনার নাম</label>
+                        <input type="text" id="customer-name" placeholder="এখানে আপনার নাম লিখুন" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-address">সম্পূর্ণ ঠিকানা</label>
+                        <input type="text" id="customer-address" placeholder="আপনার সম্পূর্ণ ঠিকানা দিন" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-mobile">মোবাইল নম্বর</label>
+                        <input type="tel" id="customer-mobile" placeholder="আপনার মোবাইল নম্বর দিন" required>
+                    </div>
+                    <button type="submit" class="submit-btn">WhatsApp এ অর্ডার করুন</button>
+                </form>
+            </div>
+        </div>
+    </main>
 
+    <!-- Footer Section -->
+    <footer id="footer" class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>গুরুত্বপূর্ণ লিংক</h4>
+                    <ul>
+                        <li><a href="#home"><i class="fas fa-link"></i> হোম পেজ</a></li>
+                        <li><a href="#products"><i class="fas fa-link"></i> শপ পেজ</a></li>
+                        <li><a href="#footer"><i class="fas fa-link"></i> যোগাযোগ পেজ</a></li>
+                        <li><a href="#"><i class="fas fa-link"></i> রিটার্ন পলিসি</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>আমাদের সাথে যোগাযোগ করুন</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> 01707632442</li>
+                        <li><i class="fab fa-whatsapp"></i> 01707632442</li>
+                        <li><i class="fas fa-envelope"></i> admin@premiumplusbd.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> মৌচাক, কালিয়াকৈর, গাজীপুর - ১৭০০</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>সোশ্যাল প্রোফাইল</h4>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/profile.php?id=61578353266944" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                 <div class="footer-col">
+                    <h4>ভেরিফাইড পেমেন্ট মেথড</h4>
+                    <div class="payment-methods">
+                        <img src="https://i.ibb.co/QfCvyL1/bkash.png" alt="Bkash">
+                        <img src="https://i.ibb.co/3k5f2p6/nagad.png" alt="Nagad">
+                        <img src="https://i.ibb.co/GvxDsVw/rocket.png" alt="Rocket">
+                        <img src="https://i.ibb.co/RSCt1QJ/cod.png" alt="Cash on Delivery">
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 premiumplusbd. All Rights Reserved.</p>
+                <p>Designed By Khaled it Solution</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
