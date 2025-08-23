@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>আমার ডেমো শপ</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">
+      <img src="./images/logo.png" alt="Logo">
+    </a>
+    <nav class="nav">
+      <a href="index.html">হোম</a>
+      <a href="products.html">সব পণ্য</a>
+      <a href="contact.html">কন্টাক্ট</a>
+    </nav>
+  </header>
 
+  <section class="banner">
+    <div class="banner-content">
+      <h1>Fresh Styles, Great Prices</h1>
+      <p>নতুন কালেকশন থেকে পছন্দ করুন</p>
+      <a href="products.html" class="btn">Shop Now</a>
+    </div>
+    <img class="banner-bg" src="./images/banner.jpg" alt="Banner">
+  </section>
+
+  <section class="featured-products">
+    <h2>ফিচার্ড পণ্য</h2>
+    <div id="featured-products-grid" class="product-grid"></div>
+  </section>
+
+  <footer class="footer">
+    <p>© <span id="yr"></span> আমার ডেমো শপ</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
