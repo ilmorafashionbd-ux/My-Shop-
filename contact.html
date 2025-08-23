@@ -1,1 +1,50 @@
- 
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>কন্টাক্ট — আমার ডেমো শপ</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">
+      <img src="./images/logo.png" alt="Logo">
+    </a>
+    <nav class="nav">
+      <a href="index.html">হোম</a>
+      <a href="products.html">সব পণ্য</a>
+      <a class="active" href="contact.html">কন্টাক্ট</a>
+    </nav>
+  </header>
+
+  <section class="contact-form-section">
+    <h2>আমাদের সাথে যোগাযোগ</h2>
+    <form id="contact-form" class="contact-form">
+      <div class="form-group">
+        <label>নাম</label>
+        <input id="contact-name" required />
+      </div>
+      <div class="form-group">
+        <label>মোবাইল</label>
+        <input id="contact-phone" required />
+      </div>
+      <div class="form-group">
+        <label>ঠিকানা</label>
+        <input id="contact-address" />
+      </div>
+      <div class="form-group">
+        <label>বার্তা</label>
+        <textarea id="contact-message" rows="4"></textarea>
+      </div>
+      <button class="btn" type="submit">WhatsApp-এ পাঠান</button>
+    </form>
+  </section>
+
+  <footer class="footer">
+    <p>© <span id="yr"></span> আমার ডেমো শপ</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
