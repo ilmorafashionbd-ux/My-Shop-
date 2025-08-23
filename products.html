@@ -1,1 +1,35 @@
- 
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>সব পণ্য — আমার ডেমো শপ</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">
+      <img src="./images/logo.png" alt="Logo">
+    </a>
+    <nav class="nav">
+      <a href="index.html">হোম</a>
+      <a class="active" href="products.html">সব পণ্য</a>
+      <a href="contact.html">কন্টাক্ট</a>
+    </nav>
+  </header>
+
+  <section class="toolbar">
+    <input id="search" type="search" placeholder="পণ্য সার্চ করুন..." />
+  </section>
+
+  <main class="maxwrap">
+    <div id="all-products-grid" class="product-grid"></div>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="yr"></span> আমার ডেমো শপ</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
