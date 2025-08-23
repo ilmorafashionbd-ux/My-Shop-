@@ -1,64 +1,35 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>পণ্যের বিস্তারিত — আমার ডেমো শপ</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>Product Details - Fashion BD</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="header">
-    <a href="index.html" class="logo">
-      <img src="./images/logo.png" alt="Logo">
-    </a>
-    <nav class="nav">
-      <a href="index.html">হোম</a>
-      <a href="products.html">সব পণ্য</a>
-      <a href="contact.html">কন্টাক্ট</a>
-    </nav>
-  </header>
+    <!-- Header -->
+    <header class="header">
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="Fashion BD">
+        </a>
+        <nav class="nav">
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+    </header>
 
-  <main class="product-detail">
-    <div id="product-detail-container" class="product-detail-container">
-      <!-- JS দিয়ে ভরবে -->
-    </div>
-  </main>
+    <!-- Product Detail Section -->
+    <section class="product-detail">
+        <div id="product-detail">
+            <!-- Product detail will be loaded here from products.csv -->
+        </div>
+    </section>
 
-  <!-- WhatsApp অর্ডার Modal -->
-  <div class="modal" id="order-modal">
-    <div class="modal-content">
-      <span class="close-btn" id="close-modal">&times;</span>
-      <h3>অর্ডার ফর্ম</h3>
-      <form id="order-form" class="contact-form">
-        <div class="form-group">
-          <label>প্রোডাক্ট</label>
-          <input id="product-name-input" readonly />
-        </div>
-        <div class="form-group">
-          <label>দাম</label>
-          <input id="product-price-input" readonly />
-        </div>
-        <div class="form-group">
-          <label>আপনার নাম</label>
-          <input id="customer-name" required />
-        </div>
-        <div class="form-group">
-          <label>মোবাইল</label>
-          <input id="customer-phone" required />
-        </div>
-        <div class="form-group">
-          <label>ঠিকানা</label>
-          <textarea id="customer-address" rows="3" required></textarea>
-        </div>
-        <button class="btn" type="submit">WhatsApp-এ পাঠান</button>
-      </form>
-    </div>
-  </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Fashion BD. All rights reserved.</p>
+    </footer>
 
-  <footer class="footer">
-    <p>© <span id="yr"></span> আমার ডেমো শপ</p>
-  </footer>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
