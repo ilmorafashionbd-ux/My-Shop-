@@ -1,4 +1,8 @@
-Name,Price,Description,ImageFileName
-T-Shirt,500,100% Cotton,product1.jpg
-Panjabi,1200,Soft Cotton Panjabi,product2.jpg
-Hijab,350,Premium Quality Hijab,product3.jpg
+id,name,price,image,description
+1,Polo Shirt,400,images/product_1.jpg,Comfortable cotton polo shirt perfect for casual wear.
+2,T-Shirt,350,images/product_2.jpg,High-quality cotton t-shirt with modern design.
+3,Shirt,500,images/product_3.jpg,Formal shirt suitable for office and business meetings.
+4,Jeans,750,images/product_4.jpg,Stylish slim-fit jeans for everyday use.
+5,Shoes,1200,images/product_5.jpg,Durable and fashionable shoes for all occasions.
+6,Jacket,1500,images/product_6.jpg,Warm and stylish jacket, perfect for winter.
+7,Cap,200,images/product_7.jpg,Trendy cap for sun protection and casual style.
