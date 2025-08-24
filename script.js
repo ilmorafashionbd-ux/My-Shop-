@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuration ---
     // CSV File URL from Google Sheets
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPm9-h3hnXGp1r7HBXl6qam4_s8v1SNKnp0Xwa-VdrxJXRRaQihnxKl51fIGuLF6I4VLhGRZ0cHAv9/pub?gid=0&single=true&output=csv';
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPm-h3hnXGp1r7HBXl6qam4_s8v1SNKnp0Xwa-VdrxJXRRaQihnxKl51fIGuLF6I4VLhGRZ0cHAv9/pub?gid=0&single=true&output=csv';
     // Base path for product images from GitHub
     const imageBasePath = 'https://ilmorafashionbd-ux.github.io/My-Shop-/images/';
 
@@ -27,7 +27,23 @@ document.addEventListener('DOMContentLoaded', () => {
             download: true,
             header: true,
             complete: (results) => {
-                products = results.data;
+                // Process and convert data types as required
+                products = results.data.map(product => {
+                    // Skip if product name is missing (handles empty rows in sheet)
+                    if (!product.product_name) {
+                        return null;
+                    }
+                    return {
+                        ...product,
+                        // Convert 'id' to a number (integer)
+                        id: parseInt(product.id, 10),
+                        // Convert 'price' to a number (float), removing any non-numeric characters except '.'
+                        price: parseFloat(String(product.price).replace(/[^0-9.]/g, '')),
+                        // Convert 'createdAt' string to a JavaScript Date object
+                        createdAt: new Date(product.createdAt)
+                    };
+                }).filter(Boolean); // Filter out any null entries from empty rows
+
                 displayProducts(products);
             },
             error: (err) => {
@@ -41,10 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayProducts(productsToDisplay, container = productGrid) {
         container.innerHTML = ''; // Clear previous content
         productsToDisplay.forEach((product) => {
-            if (!product.product_name || !product.image_url) return; // Skip empty rows
+            if (!product.product_name || !product.image_url) return; // Skip invalid rows
 
             const isOutOfStock = product.stock_status === 'Out of Stock';
-            const fullImageUrl = imageBasePath + product.image_url; // Combine base path and image file name
+            // Image path comes from CSV (image_url) and is combined with the base path
+            const fullImageUrl = imageBasePath + product.image_url; 
             
             const productCard = document.createElement('div');
             productCard.className = 'product-card';
@@ -83,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const product = products.find(p => p.product_name === productName);
         if (!product) return;
         
-        const fullImageUrl = imageBasePath + product.image_url; // Combine base path and image file name
+        const fullImageUrl = imageBasePath + product.image_url;
 
         productDetailContent.innerHTML = `
             <div class="product-detail-layout">
