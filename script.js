@@ -27,22 +27,18 @@ document.addEventListener('DOMContentLoaded', () => {
             download: true,
             header: true,
             complete: (results) => {
-                // Process and convert data types as required
+                // Process data to handle potential empty rows and ensure correct data types
                 products = results.data.map(product => {
-                    // Skip if product name is missing (handles empty rows in sheet)
+                    // Skip if product_name is missing, which usually indicates an empty row
                     if (!product.product_name) {
                         return null;
                     }
                     return {
                         ...product,
-                        // Convert 'id' to a number (integer)
-                        id: parseInt(product.id, 10),
-                        // Convert 'price' to a number (float), removing any non-numeric characters except '.'
-                        price: parseFloat(String(product.price).replace(/[^0-9.]/g, '')),
-                        // Convert 'createdAt' string to a JavaScript Date object
-                        createdAt: new Date(product.createdAt)
+                        // Ensure price is a number for any future calculations
+                        price: parseFloat(String(product.price).replace(/[^0-9.]/g, '')) || 0,
                     };
-                }).filter(Boolean); // Filter out any null entries from empty rows
+                }).filter(Boolean); // Removes any null entries from the array
 
                 displayProducts(products);
             },
@@ -57,10 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayProducts(productsToDisplay, container = productGrid) {
         container.innerHTML = ''; // Clear previous content
         productsToDisplay.forEach((product) => {
-            if (!product.product_name || !product.image_url) return; // Skip invalid rows
+            // Further check to ensure the product object is valid
+            if (!product.product_name || !product.image_url) return;
 
             const isOutOfStock = product.stock_status === 'Out of Stock';
-            // Image path comes from CSV (image_url) and is combined with the base path
             const fullImageUrl = imageBasePath + product.image_url; 
             
             const productCard = document.createElement('div');
@@ -110,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="product-detail-info">
                     <h2>${product.product_name}</h2>
                     <p class="product-price">${product.price} ৳</p>
-                    <p class="product-description">${product.description}</p>
+                    <p class="product-description">${product.description || 'কোনো বিবরণ যোগ করা হয়নি।'}</p>
                 </div>
             </div>
         `;
