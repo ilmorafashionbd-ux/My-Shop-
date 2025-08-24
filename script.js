@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuration ---
     // CSV File URL from Google Sheets
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPm-h3hnXGp1r7HBXl6qam4_s8v1SNKnp0Xwa-VdrxJXRRaQihnxKl51fIGuLF6I4VLhGRZ0cHAv9/pub?gid=0&single=true&output=csv';
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPm9-h3hnXGp1r7HBXl6qam4_s8v1SNKnp0Xwa-VdrxJXRRaQihnxKl51fIGuLF6I4VLhGRZ0cHAv9/pub?gid=0&single=true&output=csv';
     // Base path for product images from GitHub
     const imageBasePath = 'https://ilmorafashionbd-ux.github.io/My-Shop-/images/';
 
