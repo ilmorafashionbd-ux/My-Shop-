@@ -1,183 +1,194 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
+
+    // ----------------------------------------------------------------------------------
+    // গুরুত্বপূর্ণ: এখানে আপনার গুগল শিট CSV ফাইলের লিঙ্কটি বসাতে হবে।
+    // কিভাবে লিঙ্ক তৈরি করবেন তা নিচের নির্দেশিকায় বলা আছে।
+    // ----------------------------------------------------------------------------------
+    const GOOGLE_SHEET_CSV_URL = 'YOUR_GOOGLE_SHEET_CSV_LINK_HERE';
+
+    // প্রয়োজনীয় HTML এলিমেন্টগুলো সিলেক্ট করা
     const productGrid = document.getElementById('product-grid');
-    const productDetailModal = document.getElementById('product-detail-modal');
-    const productDetailContent = document.getElementById('product-detail-content');
-    const relatedProductsGrid = document.getElementById('related-products-grid');
-    const closeModalBtn = productDetailModal.querySelector('.close-btn');
+    const detailModal = document.getElementById('product-detail-modal');
     const orderModal = document.getElementById('order-modal');
-    const closeOrderModalBtn = orderModal.querySelector('.order-close-btn');
-    const orderForm = document.getElementById('order-form');
+    const detailContent = document.getElementById('product-detail-content');
+    const relatedProductsGrid = document.getElementById('related-products-grid');
+    const closeBtns = document.querySelectorAll('.close-btn');
     const menuBtn = document.querySelector('.menu-btn');
     const navbar = document.querySelector('.navbar');
+    const orderForm = document.getElementById('order-form');
 
-    let products = []; // To store all product data
+    let allProducts = []; // সব প্রোডাক্ট এখানে স্টোর করা হবে
 
-    // --- Configuration ---
-    // CSV File URL from Google Sheets
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPm-h3hnXGp1r7HBXl6qam4_s8v1SNKnp0Xwa-VdrxJXRRaQihnxKl51fIGuLF6I4VLhGRZ0cHAv9/pub?gid=0&single=true&output=csv';
-    // Base path for product images from GitHub
-    const imageBasePath = 'https://ilmorafashionbd-ux.github.io/My-Shop-/images/';
+    // গুগল শিট থেকে প্রোডাক্ট লোড করার ফাংশন
+    function loadProducts() {
+        // প্রোডাক্ট গ্রিডে লোডিং মেসেজ দেখানো
+        productGrid.innerHTML = '<p>প্রোডাক্ট লোড হচ্ছে...</p>';
 
-    // --- Data Fetching and Display ---
-
-    // Fetch product data from Google Sheets CSV
-    function fetchProducts() {
-        Papa.parse(csvUrl, {
+        Papa.parse(GOOGLE_SHEET_CSV_URL, {
             download: true,
             header: true,
             complete: (results) => {
-                // Process data to handle potential empty rows and ensure correct data types
-                products = results.data.map(product => {
-                    // Skip if product_name is missing, which usually indicates an empty row
-                    if (!product.product_name) {
-                        return null;
-                    }
-                    return {
-                        ...product,
-                        // Ensure price is a number for any future calculations
-                        price: parseFloat(String(product.price).replace(/[^0-9.]/g, '')) || 0,
-                    };
-                }).filter(Boolean); // Removes any null entries from the array
-
-                displayProducts(products);
+                // যে সকল প্রোডাক্টের ID আছে শুধু সেগুলোই নেওয়া হবে
+                allProducts = results.data.filter(p => p.id && p.id.trim() !== '');
+                if(allProducts.length > 0) {
+                    displayProducts(allProducts);
+                } else {
+                    productGrid.innerHTML = '<p>কোনো প্রোডাক্ট পাওয়া যায়নি। আপনার গুগল শিটটি চেক করুন।</p>';
+                }
             },
             error: (err) => {
-                console.error("Error fetching or parsing CSV data:", err);
-                productGrid.innerHTML = '<p>দুঃখিত, পণ্য লোড করা সম্ভব হচ্ছে না।</p>';
+                console.error("CSV ফাইল লোড করতে সমস্যা হয়েছে:", err);
+                productGrid.innerHTML = `<p>প্রোডাক্ট লোড করা যায়নি। অনুগ্রহ করে আপনার গুগল শিট CSV লিঙ্কটি সঠিক কি না তা চেক করুন।</p>`;
             }
         });
     }
 
-    // Display products on the homepage
-    function displayProducts(productsToDisplay, container = productGrid) {
-        container.innerHTML = ''; // Clear previous content
-        productsToDisplay.forEach((product) => {
-            // Further check to ensure the product object is valid
-            if (!product.product_name || !product.image_url) return;
+    // ওয়েবসাইটে প্রোডাক্ট দেখানোর ফাংশন
+    function displayProducts(products, gridElement = productGrid) {
+        gridElement.innerHTML = ''; // আগের প্রোডাক্ট মুছে ফেলা
+        products.forEach(product => {
+            if (!product.name || !product.imageUrl) return; // নাম বা ছবি না থাকলে বাদ দেওয়া
 
-            const isOutOfStock = product.stock_status === 'Out of Stock';
-            const fullImageUrl = imageBasePath + product.image_url; 
-            
-            const productCard = document.createElement('div');
-            productCard.className = 'product-card';
+            const isOutOfStock = product.stockStatus && product.stockStatus.toLowerCase() === 'out of stock';
 
-            productCard.innerHTML = `
-                <div class="product-image">
-                    <img src="${fullImageUrl}" alt="${product.product_name}">
-                    ${isOutOfStock ? '<div class="stock-status">Out of stock</div>' : ''}
-                </div>
-                <div class="product-info">
-                    <h3 class="product-name">${product.product_name}</h3>
-                    <p class="product-price">${product.price} ৳</p>
-                    <button class="order-btn" ${isOutOfStock ? 'disabled' : ''}>অর্ডার করুন</button>
+            const productCardHTML = `
+                <div class="product-card" data-id="${product.id}">
+                    <div class="product-image">
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                        ${isOutOfStock ? '<span class="stock-status">Out of Stock</span>' : ''}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-price">৳ ${product.price}</p>
+                        <button class="order-btn" data-product-name="${product.name}" ${isOutOfStock ? 'disabled' : ''}>
+                            ${isOutOfStock ? 'Out of Stock' : 'অর্ডার করুন'}
+                        </button>
+                    </div>
                 </div>
             `;
-            
-            // Event listener for showing product details
-            productCard.querySelector('.product-image').addEventListener('click', () => showProductDetail(product.product_name));
-            productCard.querySelector('.product-name').addEventListener('click', () => showProductDetail(product.product_name));
-
-            // Event listener for the order button
-            const orderBtn = productCard.querySelector('.order-btn');
-            orderBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent detail modal from opening
-                openOrderModal(product.product_name);
+            gridElement.innerHTML += productCardHTML;
+        });
+        addCardEventListeners(); // ইভেন্ট যুক্ত করা
+    }
+    
+    // প্রতিটি প্রোডাক্ট কার্ডে ক্লিক ইভেন্ট যুক্ত করা
+    function addCardEventListeners() {
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // অর্ডার বাটনে ক্লিক করলে যেন ডিটেইলস পপআপ না আসে
+                if (!e.target.classList.contains('order-btn')) {
+                    const productId = card.dataset.id;
+                    showProductDetail(productId);
+                }
             });
+        });
 
-            container.appendChild(productCard);
+        document.querySelectorAll('.order-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                if (!button.disabled) {
+                    const productName = e.target.dataset.productName;
+                    openOrderModal(productName);
+                }
+            });
         });
     }
 
-    // --- Modal Functionality ---
-
-    // Show product detail modal
-    function showProductDetail(productName) {
-        const product = products.find(p => p.product_name === productName);
+    // প্রোডাক্টের বিস্তারিত তথ্য মডালে দেখানো
+    function showProductDetail(productId) {
+        const product = allProducts.find(p => p.id == productId);
         if (!product) return;
         
-        const fullImageUrl = imageBasePath + product.image_url;
+        const isOutOfStock = product.stockStatus && product.stockStatus.toLowerCase() === 'out of stock';
 
-        productDetailContent.innerHTML = `
+        detailContent.innerHTML = `
             <div class="product-detail-layout">
                 <div class="product-detail-image">
-                    <img src="${fullImageUrl}" alt="${product.product_name}">
+                    <img src="${product.imageUrl}" alt="${product.name}">
                 </div>
                 <div class="product-detail-info">
-                    <h2>${product.product_name}</h2>
-                    <p class="product-price">${product.price} ৳</p>
-                    <p class="product-description">${product.description || 'কোনো বিবরণ যোগ করা হয়নি।'}</p>
+                    <h2>${product.name}</h2>
+                    <p class="product-price">৳ ${product.price}</p>
+                    <p class="product-description">${product.description || 'এই প্রোডাক্টের কোনো বিবরণ নেই।'}</p>
+                     <button class="order-btn" data-product-name="${product.name}" ${isOutOfStock ? 'disabled' : ''}>
+                        ${isOutOfStock ? 'Out of Stock' : 'অর্ডার করুন'}
+                    </button>
                 </div>
             </div>
         `;
+        
+        // একই ক্যাটাগরির অন্যান্য প্রোডাক্ট দেখানো
+        const relatedProducts = allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+        displayProducts(relatedProducts, relatedProductsGrid);
 
-        displayRelatedProducts(product.category, product.product_name);
-        productDetailModal.style.display = 'block';
+        detailModal.style.display = 'block';
+
+        // মডালের অর্ডার বাটনে ইভেন্ট যুক্ত করা
+        detailContent.querySelector('.order-btn').addEventListener('click', (e) => {
+            if(!e.target.disabled){
+                const productName = e.target.dataset.productName;
+                openOrderModal(productName);
+            }
+        });
     }
     
-    // Display related products in the detail modal
-    function displayRelatedProducts(category, currentProductName) {
-        const related = products.filter(p => p.category === category && p.product_name !== currentProductName);
-        displayProducts(related, relatedProductsGrid);
-    }
-    
-    // Open the order form modal and set the product name
+    // অর্ডার করার মডাল খোলা
     function openOrderModal(productName) {
         document.getElementById('product-name-input').value = productName;
         orderModal.style.display = 'block';
     }
 
-    // Close modals
-    function setupModalClosers() {
-        closeModalBtn.onclick = () => productDetailModal.style.display = 'none';
-        closeOrderModalBtn.onclick = () => orderModal.style.display = 'none';
-        
-        window.onclick = (event) => {
-            if (event.target == productDetailModal) {
-                productDetailModal.style.display = 'none';
-            }
-            if (event.target == orderModal) {
-                orderModal.style.display = 'none';
-            }
-        };
-    }
-    
-    // --- Order Form Submission ---
-
+    // অর্ডার ফর্ম সাবমিট হলে হোয়াটসঅ্যাপে মেসেজ পাঠানো
     orderForm.addEventListener('submit', (e) => {
         e.preventDefault();
-
         const productName = document.getElementById('product-name-input').value;
         const customerName = document.getElementById('customer-name').value;
         const customerAddress = document.getElementById('customer-address').value;
         const customerMobile = document.getElementById('customer-mobile').value;
 
-        // WhatsApp Details
-        const whatsappNumber = '01778095805';
-        
-        // Construct the message
-        const message = `নমস্কার, আমি এই পণ্যটি অর্ডার করতে চাই।\nপ্রোডাক্ট: ${productName}\nনাম: ${customerName}\nঠিকানা: ${customerAddress}\nমোবাইল: ${customerMobile}`;
-        
-        // Encode the message for a URL
-        const encodedMessage = encodeURIComponent(message);
-        
-        // Create the WhatsApp URL
-        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-        
-        // Open WhatsApp in a new tab
-        window.open(whatsappUrl, '_blank');
+        // আপনার হোয়াটসঅ্যাপ নম্বর (footer থেকেও নেওয়া যায়)
+        const yourWhatsAppNumber = '8801778095805'; 
 
-        // Reset and close the form
+        const message = `
+Hello Ilmora Fashion,
+I would like to place an order:
+--------------------
+Product: ${productName}
+Name: ${customerName}
+Address: ${customerAddress}
+Mobile: ${customerMobile}
+--------------------
+        `;
+
+        const whatsappURL = `https://wa.me/${yourWhatsAppNumber}?text=${encodeURIComponent(message.trim())}`;
+        
+        window.open(whatsappURL, '_blank'); // নতুন ট্যাবে হোয়াটসঅ্যাপ খুলবে
+        
         orderForm.reset();
         orderModal.style.display = 'none';
     });
-
-    // --- Mobile Navigation ---
+    
+    // মোবাইল মেনু (হ্যামবার্গার) বাটন
     menuBtn.addEventListener('click', () => {
         navbar.classList.toggle('active');
     });
 
-    // --- Initial Load ---
-    fetchProducts();
-    setupModalClosers();
+    // মডাল বন্ধ করার ফাংশন
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            detailModal.style.display = 'none';
+            orderModal.style.display = 'none';
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target == detailModal) {
+            detailModal.style.display = 'none';
+        }
+        if (e.target == orderModal) {
+            orderModal.style.display = 'none';
+        }
+    });
+
+    // ওয়েবসাইট লোড হওয়ার সাথে সাথে প্রোডাক্ট লোড শুরু করা
+    loadProducts();
 });
