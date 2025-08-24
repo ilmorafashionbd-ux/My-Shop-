@@ -4,17 +4,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const productDetailModal = document.getElementById('product-detail-modal');
     const productDetailContent = document.getElementById('product-detail-content');
     const relatedProductsGrid = document.getElementById('related-products-grid');
-    const closeModalBtn = document.querySelector('.close-btn');
+    const closeModalBtn = productDetailModal.querySelector('.close-btn');
     const orderModal = document.getElementById('order-modal');
-    const closeOrderModalBtn = document.querySelector('.order-close-btn');
+    const closeOrderModalBtn = orderModal.querySelector('.order-close-btn');
     const orderForm = document.getElementById('order-form');
     const menuBtn = document.querySelector('.menu-btn');
     const navbar = document.querySelector('.navbar');
 
     let products = []; // To store all product data
 
+    // --- Configuration ---
     // CSV File URL from Google Sheets
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPm-h3hnXGp1r7HBXl6qam4_s8v1SNKnp0Xwa-VdrxJXRRaQihnxKl51fIGuLF6I4VLhGRZ0cHAv9/pub?gid=0&single=true&output=csv';
+    // Base path for product images from GitHub
+    const imageBasePath = 'https://ilmorafashionbd-ux.github.io/My-Shop-/images/';
 
     // --- Data Fetching and Display ---
 
@@ -37,18 +40,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display products on the homepage
     function displayProducts(productsToDisplay, container = productGrid) {
         container.innerHTML = ''; // Clear previous content
-        productsToDisplay.forEach((product, index) => {
-            if (!product.product_name) return; // Skip empty rows
+        productsToDisplay.forEach((product) => {
+            if (!product.product_name || !product.image_url) return; // Skip empty rows
 
             const isOutOfStock = product.stock_status === 'Out of Stock';
+            const fullImageUrl = imageBasePath + product.image_url; // Combine base path and image file name
             
             const productCard = document.createElement('div');
             productCard.className = 'product-card';
-            productCard.dataset.index = products.findIndex(p => p.product_name === product.product_name); // Use original index
 
             productCard.innerHTML = `
                 <div class="product-image">
-                    <img src="${product.image_url}" alt="${product.product_name}">
+                    <img src="${fullImageUrl}" alt="${product.product_name}">
                     ${isOutOfStock ? '<div class="stock-status">Out of stock</div>' : ''}
                 </div>
                 <div class="product-info">
@@ -64,12 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Event listener for the order button
             const orderBtn = productCard.querySelector('.order-btn');
-            if (orderBtn) {
-                orderBtn.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent modal from opening
-                    openOrderModal(product.product_name);
-                });
-            }
+            orderBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent detail modal from opening
+                openOrderModal(product.product_name);
+            });
 
             container.appendChild(productCard);
         });
@@ -82,10 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const product = products.find(p => p.product_name === productName);
         if (!product) return;
         
+        const fullImageUrl = imageBasePath + product.image_url; // Combine base path and image file name
+
         productDetailContent.innerHTML = `
             <div class="product-detail-layout">
                 <div class="product-detail-image">
-                    <img src="${product.image_url}" alt="${product.product_name}">
+                    <img src="${fullImageUrl}" alt="${product.product_name}">
                 </div>
                 <div class="product-detail-info">
                     <h2>${product.product_name}</h2>
@@ -112,17 +115,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Close modals
-    closeModalBtn.onclick = () => productDetailModal.style.display = 'none';
-    closeOrderModalBtn.onclick = () => orderModal.style.display = 'none';
-    
-    window.onclick = (event) => {
-        if (event.target == productDetailModal) {
-            productDetailModal.style.display = 'none';
-        }
-        if (event.target == orderModal) {
-            orderModal.style.display = 'none';
-        }
-    };
+    function setupModalClosers() {
+        closeModalBtn.onclick = () => productDetailModal.style.display = 'none';
+        closeOrderModalBtn.onclick = () => orderModal.style.display = 'none';
+        
+        window.onclick = (event) => {
+            if (event.target == productDetailModal) {
+                productDetailModal.style.display = 'none';
+            }
+            if (event.target == orderModal) {
+                orderModal.style.display = 'none';
+            }
+        };
+    }
     
     // --- Order Form Submission ---
 
@@ -161,4 +166,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Load ---
     fetchProducts();
+    setupModalClosers();
 });
