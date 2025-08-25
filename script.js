@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // ----------------------------------------------------------------------------------
-    // গুরুত্বপূর্ণ: এখানে আপনার গুগল শিট CSV ফাইলের লিঙ্কটি বসাতে হবে।
-    // কিভাবে লিঙ্ক তৈরি করবেন তা নিচের নির্দেশিকায় বলা আছে।
+    // গুরুত্বপূর্ণ: এখানে আপনার গুগল শিট CSV ফাইলের লিঙ্কটি বসানো আছে।
+    // এই লিঙ্কটি পরিবর্তন করার প্রয়োজন নেই।
     // ----------------------------------------------------------------------------------
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPm9-h3hnXGp1r7HBXl6qam4_s8v1SNKnp0Xwa-VdrxJXRRaQihnxKl51fIGuLF6I4VLhGRZ0cHAv9/pub?gid=0&single=true&output=csv';
 
