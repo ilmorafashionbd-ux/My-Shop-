@@ -1,175 +1,188 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- CONFIGURATION ---
-    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT24LzAo8c_NB4a-jT5hEwIsew-2v_E5X9o3L-lE5UABh_2s8Bv-v0j2Tf_m-F2E3a4_a4a4QzB_c/pub?output=csv';
-    const WHATSAPP_NUMBER = '1234567890'; // আপনার WhatsApp নম্বর এখানে দিন
 
-    // --- DOM ELEMENTS ---
-    const featuredGrid = document.getElementById('featured-products-grid');
-    const allProductsGrid = document.getElementById('all-products-grid');
-    
-    const detailModal = document.getElementById('product-detail-modal');
-    const detailContent = document.getElementById('product-detail-content');
-    const relatedGrid = document.getElementById('related-products-grid');
-    
+    // --- DOM Element References ---
+    const productGrid = document.getElementById('product-grid');
+    const productDetailModal = document.getElementById('product-detail-modal');
     const orderModal = document.getElementById('order-modal');
+    const productDetailContent = document.getElementById('product-detail-content');
+    const relatedProductsGrid = document.getElementById('related-products-grid');
     const orderForm = document.getElementById('order-form');
-    
-    const closeButtons = document.querySelectorAll('.close-btn');
+    const productNameInput = document.getElementById('product-name-input');
+    const menuBtn = document.querySelector('.menu-btn');
+    const navbar = document.querySelector('.navbar');
+
+    // --- Configuration ---
+    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPm9-h3hnXGp1r7HBXl6qam4_s8v1SNKnp0Xwa-VdrxJXRRaQihnxKl51fIGuLF6I4VLhGRZ0cHAv9/pub?gid=0&single=true&output=csv';
+    const IMAGE_BASE_URL = 'https://ilmorafashionbd-ux.github.io/My-Shop-/images/';
+    const WHATSAPP_NUMBER = '8801778095805'; // Your WhatsApp Number with country code
 
     let allProducts = [];
 
-    // --- DATA FETCHING ---
-    const fetchProducts = () => {
+    // --- Data Fetching and Parsing ---
+    function fetchProducts() {
         Papa.parse(GOOGLE_SHEET_URL, {
             download: true,
             header: true,
             complete: (results) => {
-                allProducts = results.data.filter(p => p.ProductID && p.Name && p.Price && p.ImageURL);
-                displayProducts();
+                allProducts = results.data.filter(p => p.ID && p.Name); // Filter out empty rows
+                displayProducts(allProducts, productGrid);
+                setupEventListeners();
             },
             error: (error) => {
-                console.error("Error fetching product data:", error);
-                const errorMessage = "<p>Sorry, products could not be loaded at this time. Please try again later.</p>";
-                if (featuredGrid) featuredGrid.innerHTML = errorMessage;
-                if (allProductsGrid) allProductsGrid.innerHTML = errorMessage;
+                console.error("Error fetching or parsing data:", error);
+                productGrid.innerHTML = '<p>Error loading products. Please try again later.</p>';
             }
         });
-    };
+    }
 
-    // --- PRODUCT DISPLAY ---
-    const displayProducts = () => {
-        // For index.html (Featured Products)
-        if (featuredGrid) {
-            renderProductGrid(featuredGrid, allProducts.slice(0, 4)); // Show first 4 products
-        }
-        // For products.html (All Products)
-        if (allProductsGrid) {
-            renderProductGrid(allProductsGrid, allProducts);
-        }
-    };
+    // --- Display Logic ---
+    function displayProducts(products, gridElement) {
+        gridElement.innerHTML = '';
+        products.forEach(product => {
+            const isOutOfStock = product.Stock === 'Out';
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.dataset.id = product.ID;
 
-    const renderProductGrid = (gridElement, productsToDisplay) => {
-        if (productsToDisplay.length === 0) {
-            gridElement.innerHTML = "<p>No products found.</p>";
-            return;
-        }
-        gridElement.innerHTML = productsToDisplay.map(product => `
-            <div class="product-card" data-product-id="${product.ProductID}">
-                <img src="${product.ImageURL}" alt="${product.Name}">
-                <div class="product-card-content">
-                    <h3>${product.Name}</h3>
-                    <p>Price: ${product.Price} Tk</p>
-                    <button class="btn order-now-btn">Order Now</button>
+            card.innerHTML = `
+                <div class="product-image">
+                    <img src="${IMAGE_BASE_URL}${product.Image}" alt="${product.Name}">
+                    ${isOutOfStock ? '<div class="stock-status">Stock Out</div>' : ''}
                 </div>
-            </div>
-        `).join('');
-    };
+                <div class="product-info">
+                    <div>
+                        <h3 class="product-name">${product.Name}</h3>
+                        <p class="product-price">৳${product.Price}</p>
+                    </div>
+                    <button class="order-btn" data-id="${product.ID}" ${isOutOfStock ? 'disabled' : ''}>
+                        ${isOutOfStock ? 'Unavailable' : 'অর্ডার করুন'}
+                    </button>
+                </div>
+            `;
+            gridElement.appendChild(card);
+        });
+    }
 
-    // --- MODAL HANDLING ---
-    const openModal = (modal) => {
-        modal.style.display = 'flex';
-    };
+    // --- Modal Handling ---
+    function openModal(modal) {
+        modal.style.display = 'block';
+        document.body.classList.add('modal-open');
+    }
 
-    const closeModal = (modal) => {
+    function closeModal(modal) {
         modal.style.display = 'none';
-    };
+        document.body.classList.remove('modal-open');
+    }
 
-    closeButtons.forEach(btn => {
-        btn.onclick = () => {
-            closeModal(detailModal);
-            closeModal(orderModal);
-        };
-    });
-
-    window.onclick = (event) => {
-        if (event.target === detailModal) closeModal(detailModal);
-        if (event.target === orderModal) closeModal(orderModal);
-    };
-
-    // --- EVENT LISTENERS ---
-    document.body.addEventListener('click', (event) => {
-        const card = event.target.closest('.product-card');
-        if (card) {
-            // If "Order Now" button is clicked, open order modal
-            if (event.target.classList.contains('order-now-btn')) {
-                const product = findProductById(card.dataset.productId);
-                if (product) openOrderModal(product);
-            } else { // Otherwise, open detail modal
-                const productId = card.dataset.productId;
-                openDetailModal(productId);
-            }
-        }
-    });
-
-    // --- PRODUCT DETAIL LOGIC ---
-    const findProductById = (id) => allProducts.find(p => p.ProductID === id);
-
-    const openDetailModal = (productId) => {
-        const product = findProductById(productId);
+    function showProductDetail(productId) {
+        const product = allProducts.find(p => p.ID === productId);
         if (!product) return;
 
-        detailContent.innerHTML = `
+        productDetailContent.innerHTML = `
             <div class="product-detail-layout">
                 <div class="product-detail-image">
-                    <img src="${product.ImageURL}" alt="${product.Name}">
+                    <img src="${IMAGE_BASE_URL}${product.Image}" alt="${product.Name}">
                 </div>
                 <div class="product-detail-info">
-                    <h1>${product.Name}</h1>
-                    <p class="price">Price: ${product.Price} Tk</p>
-                    <p class="description">${product.Description || 'No description available.'}</p>
-                    <button class="btn order-now-btn-modal">Order Now</button>
+                    <h2>${product.Name}</h2>
+                    <p class="product-price">Price: ৳${product.Price}</p>
+                    <p class="product-description">${product.Description || 'No description available.'}</p>
                 </div>
-            </div>`;
-        
-        // Add event listener for the new "Order Now" button inside the modal
-        detailContent.querySelector('.order-now-btn-modal').onclick = () => {
-            openOrderModal(product);
-        };
-
-        displayRelatedProducts(product.Category, product.ProductID);
-        openModal(detailModal);
-    };
-
-    const displayRelatedProducts = (category, currentProductId) => {
-        const related = allProducts.filter(p => p.Category === category && p.ProductID !== currentProductId).slice(0, 4);
-        renderProductGrid(relatedGrid, related);
-    };
-
-    // --- ORDER FORM LOGIC ---
-    const openOrderModal = (product) => {
-        closeModal(detailModal); // Close detail modal if open
-        document.getElementById('product-name-input').value = product.Name;
-        document.getElementById('product-price-input').value = product.Price;
-        openModal(orderModal);
-    };
-
-    orderForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        
-        const productName = document.getElementById('product-name-input').value;
-        const productPrice = document.getElementById('product-price-input').value;
-        const customerName = document.getElementById('customer-name').value;
-        const customerPhone = document.getElementById('customer-phone').value;
-        const customerAddress = document.getElementById('customer-address').value;
-
-        const message = `
-*New Order*
--------------------------
-*Product:* ${productName}
-*Price:* ${productPrice} Tk
--------------------------
-*Customer Name:* ${customerName}
-*Address:* ${customerAddress}
-*Phone:* ${customerPhone}
+            </div>
         `;
+        
+        showRelatedProducts(product.Category, product.ID);
+        openModal(productDetailModal);
+    }
+    
+    function showRelatedProducts(category, currentProductId) {
+        const related = allProducts.filter(p => p.Category === category && p.ID !== currentProductId).slice(0, 4);
+        if (related.length > 0) {
+            displayProducts(related, relatedProductsGrid);
+            document.getElementById('related-products').style.display = 'block';
+        } else {
+            document.getElementById('related-products').style.display = 'none';
+        }
+    }
 
-        const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
+    function showOrderForm(productId) {
+        const product = allProducts.find(p => p.ID === productId);
+        if (!product) return;
 
-        orderForm.reset();
-        closeModal(orderModal);
-    });
+        productNameInput.value = product.Name;
+        openModal(orderModal);
+    }
+    
+    // --- Event Listeners Setup ---
+    function setupEventListeners() {
+        // Product clicks for details or ordering
+        document.body.addEventListener('click', (e) => {
+            const productCard = e.target.closest('.product-card');
+            const orderBtn = e.target.closest('.order-btn');
 
-    // --- INITIALIZE ---
+            if (orderBtn) {
+                e.stopPropagation(); // Prevent card click when button is clicked
+                showOrderForm(orderBtn.dataset.id);
+            } else if (productCard) {
+                showProductDetail(productCard.dataset.id);
+            }
+        });
+
+        // Modal close buttons
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                closeModal(btn.closest('.modal'));
+            });
+        });
+
+        // Close modal on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                closeModal(e.target);
+            }
+        });
+
+        // Mobile menu toggle
+        menuBtn.addEventListener('click', () => {
+            navbar.classList.toggle('active');
+        });
+
+        // Order form submission
+        orderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerAddress = document.getElementById('customer-address').value.trim();
+            const customerMobile = document.getElementById('customer-mobile').value.trim();
+            const productName = productNameInput.value;
+
+            if (!customerName || !customerAddress || !customerMobile) {
+                alert('Please fill in all the fields.');
+                return;
+            }
+
+            const message = `
+Hello Ilmora Fashion,
+
+I would like to order the following product:
+*Product:* ${productName}
+
+My details are:
+*Name:* ${customerName}
+*Address:* ${customerAddress}
+*Mobile:* ${customerMobile}
+
+Please confirm my order.
+Thank you!
+            `;
+
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+            
+            orderForm.reset();
+            closeModal(orderModal);
+        });
+    }
+
+    // --- Initial Load ---
     fetchProducts();
 });
