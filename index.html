@@ -9,7 +9,6 @@
 </head>
 <body>
 
-    <!-- Header Section -->
     <header class="header">
         <div class="container">
             <a href="index.html" class="logo">
@@ -31,86 +30,132 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
-        <!-- Banner Section -->
         <section id="home" class="banner">
             <img src="https://ilmorafashionbd-ux.github.io/My-Shop-/images/banner.jpg" alt="Website Banner">
         </section>
 
-        <!-- Category Section -->
         <section class="categories">
             <div class="container">
                 <h2 class="section-title">পণ্যের ক্যাটাগরি</h2>
                 <div class="category-grid">
-                    <div class="category-item">
+                    <div class="category-item" data-category="all">
+                        <i class="fas fa-globe"></i>
+                        <span>সকল পণ্য</span>
+                    </div>
+                    <div class="category-item" data-category="electronics">
                         <i class="fas fa-laptop"></i>
-                        <span>Electronics</span>
+                        <span>ইলেকট্রনিক্স</span>
                     </div>
-                    <div class="category-item">
+                    <div class="category-item" data-category="mens-fashion">
                         <i class="fas fa-male"></i>
-                        <span>Men’s Fashion</span>
+                        <span>পুরুষদের ফ্যাশন</span>
                     </div>
-                    <div class="category-item">
+                    <div class="category-item" data-category="womens-fashion">
                         <i class="fas fa-female"></i>
-                        <span>Women’s Fashion</span>
+                        <span>মহিলাদের ফ্যাশন</span>
                     </div>
-                     <div class="category-item">
+                     <div class="category-item" data-category="books">
                         <i class="fas fa-book-open"></i>
-                        <span>Books & Stationery</span>
+                        <span>বই ও স্টেশনারি</span>
                     </div>
-                    <div class="category-item">
+                    <div class="category-item" data-category="home-living">
                         <i class="fas fa-couch"></i>
-                        <span>Home & Living</span>
+                        <span>ঘর ও সজ্জা</span>
                     </div>
-                    <div class="category-item">
+                    <div class="category-item" data-category="wearables">
                         <i class="fas fa-mobile-alt"></i>
-                        <span>Wearable Devices</span>
+                        <span>স্মার্ট গ্যাজেট</span>
                     </div>
-                    <div class="category-item">
+                    <div class="category-item" data-category="kids-baby">
                         <i class="fas fa-baby"></i>
-                        <span>Kids & Baby Products</span>
+                        <span>শিশু পণ্য</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Products Section -->
         <section id="products" class="products">
             <div class="container">
                 <h2 class="section-title">আমাদের সকল প্রোডাক্ট</h2>
                 <div id="product-grid" class="product-grid">
-                    <!-- Products will be loaded here by JavaScript from Google Sheet -->
-                </div>
+                    </div>
             </div>
         </section>
 
-        <!-- Product Detail Modal -->
         <div id="product-detail-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn">&times;</span>
-                <div id="product-detail-content">
-                    <!-- Product details will be injected here -->
+            <div class="modal-content product-detail-content">
+                <span class="close-btn" id="product-modal-close">&times;</span>
+                <div id="product-detail-container">
+                    <div class="product-detail-layout">
+                        <div class="product-images-section">
+                            <div class="main-image-container">
+                                <img id="main-product-image" class="main-image" src="" alt="">
+                                <div class="stock-status-badge"></div>
+                            </div>
+                            <div class="thumbnail-images" id="thumbnail-images">
+                                </div>
+                        </div>
+                        <div class="product-info-section">
+                            <h2 id="product-name"></h2>
+                            <div class="product-meta">
+                                <span id="product-category" class="meta-item"></span>
+                                <span id="product-sku" class="meta-item"></span>
+                            </div>
+                            <div class="price-info">
+                                <span id="discounted-price" class="discounted-price"></span>
+                                <span id="original-price" class="original-price"></span>
+                            </div>
+                            
+                            <div class="variants-section" id="variants-section" style="display:none;">
+                                <label for="product-variant">ভ্যারিয়েন্ট/সাইজ:</label>
+                                <select id="product-variant" class="variant-selector"></select>
+                            </div>
+
+                            <div class="quantity-section">
+                                <label for="quantity-selector">পরিমাণ:</label>
+                                <div class="quantity-input-group">
+                                    <button class="quantity-btn" id="decrease-quantity">-</button>
+                                    <input type="number" id="quantity-selector" class="quantity-input" value="1" min="1">
+                                    <button class="quantity-btn" id="increase-quantity">+</button>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="order-btn whatsapp-btn" id="whatsapp-order-btn">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp এ অর্ডার করুন
+                                </button>
+                                <button class="order-btn messenger-btn" id="messenger-order-btn">
+                                    <i class="fab fa-facebook-messenger"></i> Messenger এ অর্ডার করুন
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="product-description-section" class="product-description-section">
+                         <h3 class="section-subtitle">পণ্যের বিবরণ</h3>
+                         <div id="product-description" class="product-description"></div>
+                    </div>
+
                 </div>
                 <div id="related-products" class="related-products">
-                     <h3>Related Products</h3>
+                     <h3 class="section-subtitle">সম্পর্কিত পণ্য</h3>
                      <div id="related-products-grid" class="product-grid">
-                         <!-- Related products will be loaded here -->
-                     </div>
+                         </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Order Form Modal -->
+
         <div id="order-modal" class="modal">
             <div class="modal-content">
-                <span class="close-btn order-close-btn">&times;</span>
-                <h2>অর্ডার কনফার্ম করুন</h2>
+                <span class="close-btn order-close-btn" id="order-modal-close">&times;</span>
+                <h2 class="form-title">অর্ডার কনফার্ম করুন</h2>
                 <form id="order-form">
                     <input type="hidden" id="product-name-input">
+                    <input type="hidden" id="product-id-input">
                     <div class="form-group">
                         <label for="customer-name">আপনার নাম</label>
-                        <input type="text" id="customer-name" placeholder="এখানে আপনার নাম লিখুন" required>
+                        <input type="text" id="customer-name" placeholder="আপনার নাম লিখুন" required>
                     </div>
                     <div class="form-group">
                         <label for="customer-address">সম্পূর্ণ ঠিকানা</label>
@@ -120,13 +165,13 @@
                         <label for="customer-mobile">মোবাইল নম্বর</label>
                         <input type="tel" id="customer-mobile" placeholder="আপনার মোবাইল নম্বর দিন" required>
                     </div>
-                    <button type="submit" class="submit-btn">WhatsApp এ অর্ডার করুন</button>
+                    <button type="submit" class="submit-btn">হোয়াটসঅ্যাপে অর্ডার করুন</button>
                 </form>
             </div>
         </div>
+
     </main>
 
-    <!-- Footer Section -->
     <footer id="footer" class="footer">
         <div class="container">
             <div class="footer-grid">
@@ -159,9 +204,31 @@
         </div>
     </footer>
 
-    <!-- PapaParse Library for CSV reading -->
+    <div class="bottom-nav">
+        <a href="#home" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>হোম</span>
+        </a>
+        <a href="#products" class="nav-item">
+            <i class="fas fa-th-large"></i>
+            <span>ক্যাটাগরি</span>
+        </a>
+        <div class="nav-item cart-btn-bottom">
+            <i class="fas fa-shopping-cart"></i>
+            <span>কার্ট</span>
+            <span class="cart-count-bottom">0</span>
+        </div>
+        <a href="https://wa.me/8801778095805" target="_blank" class="nav-item">
+            <i class="fab fa-whatsapp"></i>
+            <span>হোয়াটসঅ্যাপ</span>
+        </a>
+        <a href="https://www.facebook.com/messages/t/61578353266944" target="_blank" class="nav-item">
+            <i class="fab fa-facebook-messenger"></i>
+            <span>মেসেঞ্জার</span>
+        </a>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-    <!-- Your Custom JavaScript File -->
     <script src="script.js"></script>
 </body>
-        </html>
+</html>
