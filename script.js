@@ -11,15 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // Main JavaScript for handling products, modals, and cart functionality
 document.addEventListener('DOMContentLoaded', () => {
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDl-cw7a6X_kIJh_e6Q_lIllD9_9R_IXPnCCs3HCGMhTHD9OG67rqKT2NGiHmY7hsSyeZ9sM6urutp/pub?gid=0&single=true&output=csv';
-    const GITHUB_IMAGE_BASE_URL = 'https://ilmorafashionbd-ux.github.io/My-Bazaar-/images/';
+    const GITHUB_IMAGE_BASE_URL = 'https://ilmorafashionbd-ux.github.io/My-Shop-/images/';
 
     let allProducts = [];
     let cart = [];
+    let currentProduct = null;
+    let currentVariant = null;
 
     // Selectors
     const productGrid = document.getElementById('product-grid');
     const productDetailModal = document.getElementById('product-detail-modal');
-    const productDetailContainer = document.getElementById('product-detail-container');
     const productModalCloseBtn = document.getElementById('product-modal-close');
     const orderModal = document.getElementById('order-modal');
     const orderForm = document.getElementById('order-form');
@@ -85,49 +86,123 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Show product detail
+    // Show product detail (UPDATED)
     const showProductDetail = (product) => {
+        currentProduct = product;
+        
+        const mainImage = document.getElementById('main-product-image');
+        const stockBadge = document.querySelector('.stock-status-badge');
+        const thumbnailContainer = document.getElementById('thumbnail-images');
+        const productNameEl = document.getElementById('product-name');
+        const productCategoryEl = document.getElementById('product-category');
+        const productSkuEl = document.getElementById('product-sku');
+        const discountedPriceEl = document.getElementById('discounted-price');
+        const originalPriceEl = document.getElementById('original-price');
+        const variantsSection = document.getElementById('variants-section');
+        const variantSelector = document.getElementById('product-variant');
+        const productDescriptionEl = document.getElementById('product-description');
+        const quantityInput = document.getElementById('quantity-selector');
+
+        // Reset state
+        originalPriceEl.style.display = 'none';
+        variantsSection.style.display = 'none';
+        thumbnailContainer.innerHTML = '';
+        quantityInput.value = 1;
+
+        // Populate images
         const mainImageUrl = GITHUB_IMAGE_BASE_URL + product.image_url;
         const otherImages = product.other_images ? product.other_images.split(',').map(img => GITHUB_IMAGE_BASE_URL + img.trim()) : [];
         const allImages = [mainImageUrl, ...otherImages];
-
-        productDetailContainer.innerHTML = `
-            <div class="product-detail-layout">
-                <div class="product-detail-images">
-                    <img id="main-product-image" class="main-image" src="${allImages[0]}" alt="${product.product_name}">
-                    ${allImages.length > 1 ? `
-                        <div class="thumbnail-images">
-                            ${allImages.map((img, i) => `<img class="thumbnail ${i===0?'active':''}" src="${img}" data-img-url="${img}">`).join('')}
-                        </div>` : ''}
-                </div>
-                <div class="product-detail-info">
-                    <h2>${product.product_name}</h2>
-                    <div class="product-price">মূল্য: ${product.price}৳</div>
-                    <p>${product.description || 'বিবরণ পাওয়া যায়নি।'}</p>
-                    <button class="order-btn" id="add-to-cart-btn">কার্টে যুক্ত করুন</button>
-                    <button class="order-btn" id="buy-now-btn">এখনই কিনুন</button>
-                </div>
-            </div>
-        `;
-        productDetailModal.style.display = 'block';
-        document.body.classList.add('modal-open');
-
-        // Thumbnails
-        productDetailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
-            thumb.addEventListener('click', e => {
-                document.getElementById('main-product-image').src = e.target.dataset.imgUrl;
-                productDetailContainer.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
+        mainImage.src = allImages[0];
+        
+        if (allImages.length > 1) {
+            allImages.forEach((img, i) => {
+                const thumb = document.createElement('img');
+                thumb.classList.add('thumbnail');
+                if (i === 0) thumb.classList.add('active');
+                thumb.src = img;
+                thumb.dataset.imgUrl = img;
+                thumbnailContainer.appendChild(thumb);
             });
+            thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
+                thumb.addEventListener('click', e => {
+                    mainImage.src = e.target.dataset.imgUrl;
+                    thumbnailContainer.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                });
+            });
+        }
+        
+        // Populate info
+        productNameEl.textContent = product.product_name;
+        productCategoryEl.textContent = product.category ? `ক্যাটাগরি: ${product.category}` : '';
+        productSkuEl.textContent = product.sku ? `SKU: ${product.sku}` : '';
+        productDescriptionEl.textContent = product.description || 'পণ্যের বিবরণ পাওয়া যায়নি।';
+
+        if (product.stock_status && product.stock_status.toLowerCase() === 'out of stock') {
+            stockBadge.textContent = 'Out of Stock';
+            stockBadge.style.display = 'block';
+        } else {
+            stockBadge.style.display = 'none';
+        }
+        
+        // Handle prices (discount)
+        if (product.discount_price && product.discount_price < product.price) {
+            discountedPriceEl.textContent = `${product.discount_price}৳`;
+            originalPriceEl.textContent = `${product.price}৳`;
+            originalPriceEl.style.display = 'inline-block';
+        } else {
+            discountedPriceEl.textContent = `${product.price}৳`;
+            originalPriceEl.style.display = 'none';
+        }
+        
+        // Handle variants
+        if (product.variants) {
+            variantsSection.style.display = 'block';
+            const variants = product.variants.split(',').map(v => v.trim());
+            variantSelector.innerHTML = variants.map(v => `<option value="${v}">${v}</option>`).join('');
+            currentVariant = variants[0];
+            variantSelector.addEventListener('change', (e) => {
+                currentVariant = e.target.value;
+            });
+        } else {
+            variantsSection.style.display = 'none';
+            currentVariant = null;
+        }
+        
+        // Handle quantity buttons
+        const decreaseBtn = document.getElementById('decrease-quantity');
+        const increaseBtn = document.getElementById('increase-quantity');
+        
+        decreaseBtn.addEventListener('click', () => {
+            let currentQuantity = parseInt(quantityInput.value);
+            if (currentQuantity > 1) {
+                quantityInput.value = currentQuantity - 1;
+            }
         });
 
-        // Add to cart
-        document.getElementById('add-to-cart-btn').addEventListener('click', () => addToCart(product));
+        increaseBtn.addEventListener('click', () => {
+            let currentQuantity = parseInt(quantityInput.value);
+            quantityInput.value = currentQuantity + 1;
+        });
 
-        // Buy now
-        document.getElementById('buy-now-btn').addEventListener('click', () => showOrderForm(product));
+        // Action buttons
+        document.getElementById('whatsapp-order-btn').onclick = () => {
+            const quantity = quantityInput.value;
+            const variantText = currentVariant ? `\nভ্যারিয়েন্ট: ${currentVariant}` : '';
+            const message = `🛒 নতুন অর্ডার!\n\nপণ্যের নাম: ${product.product_name}${variantText}\nপরিমাণ: ${quantity}\nমূল্য: ${discountedPriceEl.textContent}\nলিংক: ${window.location.href}`;
+            window.open(`https://wa.me/8801778095805?text=${encodeURIComponent(message)}`, '_blank');
+        };
+        
+        document.getElementById('messenger-order-btn').onclick = () => {
+            const quantity = quantityInput.value;
+            const variantText = currentVariant ? `\nভ্যারিয়েন্ট: ${currentVariant}` : '';
+            const message = `🛒 নতুন অর্ডার!\n\nপণ্যের নাম: ${product.product_name}${variantText}\nপরিমাণ: ${quantity}\nমূল্য: ${discountedPriceEl.textContent}\nলিংক: ${window.location.href}`;
+            window.open(`https://www.facebook.com/messages/t/61578353266944?text=${encodeURIComponent(message)}`, '_blank');
+        };
 
-        // Related products
+        productDetailModal.style.display = 'block';
+        document.body.classList.add('modal-open');
         showRelatedProducts(product);
         history.pushState({ modalOpen: true }, '', '#product-' + product.id);
     };
