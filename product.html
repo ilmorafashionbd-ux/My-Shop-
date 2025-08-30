@@ -1,1 +1,128 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ilmora Fashion BD - Product Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="https://ilmorafashionbd-ux.github.io/My-Shop/images/logo.png" alt="Ilmora Fashion Logo">
+                <span>Ilmora Fashion</span>
+            </a>
+            <nav class="navbar">
+                <a href="index.html">হোম</a>
+                <a href="index.html#products">শপ</a>
+                <a href="index.html#footer">যোগাযোগ</a>
+            </nav>
+            <div class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">0</span>
+            </div>
+            <div class="menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="product-detail-page" class="products">
+            <div class="container">
+                <div id="product-detail-container">
+                    <!-- Single product details will be loaded here by script.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Form Modal -->
+        <div id="order-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn order-close-btn" id="order-modal-close">&times;</span>
+                <h2 class="form-title">অর্ডার কনফার্ম করুন</h2>
+                <form id="order-form">
+                    <input type="hidden" id="product-name-input">
+                    <input type="hidden" id="product-id-input">
+                    <div class="form-group">
+                        <label for="customer-name">আপনার নাম</label>
+                        <input type="text" id="customer-name" placeholder="আপনার নাম লিখুন" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-address">সম্পূর্ণ ঠিকানা</label>
+                        <input type="text" id="customer-address" placeholder="আপনার সম্পূর্ণ ঠিকানা দিন" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-mobile">মোবাইল নম্বর</label>
+                        <input type="tel" id="customer-mobile" placeholder="আপনার মোবাইল নম্বর দিন" required>
+                    </div>
+                    <button type="submit" class="submit-btn">হোয়াটসঅ্যাপে অর্ডার করুন</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <footer id="footer" class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>গুরুত্বপূর্ণ লিংক</h4>
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-link"></i> হোম পেজ</a></li>
+                        <li><a href="index.html#products"><i class="fas fa-link"></i> শপ পেজ</a></li>
+                        <li><a href="index.html#footer"><i class="fas fa-link"></i> যোগাযোগ পেজ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>আমাদের সাথে যোগাযোগ করুন</h4>
+                    <ul>
+                        <li><i class="fab fa-whatsapp"></i> 01778095805</li>
+                        <li><i class="fas fa-envelope"></i> ilmorafashionbd@gmail.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> ঢাকা, বাংলাদেশ</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>সোশ্যাল প্রোফাইল</h4>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/profile.php?id=61578353266944" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Ilmora Fashion. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>হোম</span>
+        </a>
+        <a href="index.html#products" class="nav-item">
+            <i class="fas fa-th-large"></i>
+            <span>ক্যাটাগরি</span>
+        </a>
+        <div class="nav-item cart-btn-bottom">
+            <i class="fas fa-shopping-cart"></i>
+            <span>কার্ট</span>
+            <span class="cart-count-bottom">0</span>
+        </div>
+        <a href="https://wa.me/8801778095805" target="_blank" class="nav-item">
+            <i class="fab fa-whatsapp"></i>
+            <span>হোয়াটসঅ্যাপ</span>
+        </a>
+        <a href="https://www.facebook.com/messages/t/61578353266944" target="_blank" class="nav-item">
+            <i class="fab fa-facebook-messenger"></i>
+            <span>মেসেঞ্জার</span>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="script.js"></script>
+</body>
+          </html>
