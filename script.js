@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Main JavaScript for handling products, modals, and cart functionality
 document.addEventListener('DOMContentLoaded', () => {
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDl-cw7a6X_kIJh_e6Q_lIllD9_9R_IXPnCCs3HCGMhTHD9OG67rqKT2NGiHmY7hsSyeZ9sM6urutp/pub?gid=0&single=true&output=csv';
+    const csvUrl = https://raw.githubusercontent.com/ilmorafashionbd-ux/My-Shop-/main/products.csv/Shihab%20-%20Sheet1.csv';
     const GITHUB_IMAGE_BASE_URL = 'https://ilmorafashionbd-ux.github.io/My-Shop-/images/';
 
     let allProducts = [];
