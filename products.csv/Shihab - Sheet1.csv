@@ -1,7 +1,0 @@
-id,product_name,price,sale_price,image_url,other_images,stock_status,description,category
-1,ব্লুটুথ হেডফোন,1200,1000,product%201.jpg,"product%202.jpg, product_3.jpg",In Stock,"উচ্চমানের ব্লুটুথ হেডফোন, দীর্ঘ ব্যাটারি ব্যাকআপ",ইলেকট্রনিক্স
-2,পুরুষদের শার্ট,950,,product%202.jpg,,In Stock,"আরামদায়ক কটন শার্ট, অফিস ও ক্যাজুয়াল উভয়ের জন্য উপযুক্ত",ইলেকট্রনিক্স
-3,মহিলাদের গাউন,2200,1800,product_3.jpg,product_4.jpg,Out of Stock,"আকর্ষণীয় ডিজাইনের গাউন, ফ্যাশন সচেতনদের জন্য",ইলেকট্রনিক্স
-4,শিশুদের খেলনা গাড়ি,500,,product_4.jpg,"product_5.jpg, product_3.jpg, product_7.jpg",In Stock,মজবুত প্লাস্টিকের শিশুদের খেলনা গাড়ি,ইলেকট্রনিক্স
-
-5,ইসলামিক বই,350,300,product_5.jpg,,In Stock,মানসম্পন্ন ইসলামিক বই,ইলেকট্রনিক্স
