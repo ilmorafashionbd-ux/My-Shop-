@@ -1,314 +1,245 @@
-// Function to handle the navigation menu toggle on mobile
-document.addEventListener('DOMContentLoaded', () => {
-    const menuBtn = document.querySelector('.menu-btn');
-    const navbar = document.querySelector('.navbar');
+// আপনার Firebase কনফিগারেশন কী এখানে বসান
+// এখান থেকে শুরু
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+// এখানে শেষ
 
-    if (menuBtn && navbar) {
-        menuBtn.addEventListener('click', () => {
-            navbar.classList.toggle('active');
-        });
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+const productsCollection = db.collection('products');
+
+// DOM Elements
+const productsSection = document.getElementById('products-section');
+const adminPanel = document.getElementById('admin-panel');
+const cartSection = document.getElementById('cart-section');
+const adminLoginBtn = document.querySelector('.admin-login-btn');
+const adminLogoutBtn = document.querySelector('.admin-logout-btn');
+const loginForm = document.getElementById('login-form');
+const adminDashboard = document.getElementById('admin-dashboard');
+const adminLoginContainer = document.getElementById('admin-login-form');
+const productForm = document.getElementById('product-form');
+const productList = document.getElementById('product-list');
+const adminProductList = document.getElementById('admin-product-list');
+const cartCountSpan = document.getElementById('cart-count');
+const cartItemsContainer = document.getElementById('cart-items');
+const cartTotalSpan = document.getElementById('cart-total');
+const submitBtn = document.getElementById('submit-btn');
+
+let cart = [];
+
+// --- Page Navigation and UI Management ---
+
+function showSection(sectionId) {
+    const sections = [productsSection, adminPanel, cartSection];
+    sections.forEach(sec => sec.style.display = 'none');
+    document.getElementById(sectionId).style.display = 'block';
+}
+
+document.querySelector('.view-products-btn').addEventListener('click', () => {
+    showSection('products-section');
+    loadProducts();
+});
+adminLoginBtn.addEventListener('click', () => showSection('admin-panel'));
+document.querySelector('.cart-btn').addEventListener('click', () => {
+    showSection('cart-section');
+    renderCart();
+});
+adminLogoutBtn.addEventListener('click', () => auth.signOut());
+
+// --- Firebase Authentication ---
+
+auth.onAuthStateChanged(user => {
+    if (user && user.email === 'admin@example.com') { // Change this to your admin email
+        adminLoginBtn.style.display = 'none';
+        adminLogoutBtn.style.display = 'inline-block';
+        adminLoginContainer.style.display = 'none';
+        adminDashboard.style.display = 'block';
+        showSection('admin-panel');
+        loadAdminProducts();
+    } else {
+        adminLoginBtn.style.display = 'inline-block';
+        adminLogoutBtn.style.display = 'none';
+        adminDashboard.style.display = 'none';
+        adminLoginContainer.style.display = 'block';
+        if (productsSection.style.display !== 'block' && cartSection.style.display !== 'block') {
+            showSection('products-section');
+        }
     }
 });
 
-// Main JavaScript for handling products, modals, and cart functionality
-document.addEventListener('DOMContentLoaded', () => {
-    const csvUrl = https://raw.githubusercontent.com/ilmorafashionbd-ux/My-Shop-/main/products.csv/Shihab%20-%20Sheet1.csv';
-    const GITHUB_IMAGE_BASE_URL = 'https://ilmorafashionbd-ux.github.io/My-Shop-/images/';
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = loginForm['login-email'].value;
+    const password = loginForm['login-password'].value;
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+    } catch (error) {
+        document.getElementById('login-error-message').textContent = 'লগইন ব্যর্থ হয়েছে।';
+    }
+});
 
-    let allProducts = [];
-    let cart = [];
+// --- Firebase Firestore & Storage (Admin Panel) ---
 
-    // Selectors
-    const productGrid = document.getElementById('product-grid');
-    const productDetailContainer = document.getElementById('product-detail-container');
-    const productDetailModal = document.getElementById('product-detail-modal');
-    const productModalCloseBtn = document.getElementById('product-modal-close');
-    const orderModal = document.getElementById('order-modal');
-    const orderForm = document.getElementById('order-form');
-    const cartCountTop = document.querySelector('.cart-count');
-    const cartCountBottom = document.querySelector('.cart-count-bottom');
-    const categoryItems = document.querySelectorAll('.category-item');
+productForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = productForm['product-name'].value;
+    const price = parseFloat(productForm['product-price'].value);
+    const description = productForm['product-description'].value;
+    const imageFile = productForm['product-image'].files[0];
+    const productId = productForm['product-id'].value;
 
-    // Check if we're on the product detail page
-    const isProductDetailPage = window.location.pathname.includes('product.html');
-    
-    // Get product ID from URL if on product detail page
-    const urlParams = new URLSearchParams(window.location.search);
-    const productIdFromUrl = urlParams.get('id');
-
-    // Fetch products from Google Sheet
-    const fetchProducts = async () => {
-        try {
-            const response = await fetch(csvUrl);
-            const text = await response.text();
-            Papa.parse(text, {
-                header: true,
-                dynamicTyping: true,
-                complete: (results) => {
-                    allProducts = results.data.filter(product => product.id);
-                    
-                    if (isProductDetailPage && productIdFromUrl) {
-                        // If on product detail page, show only the specific product
-                        const product = allProducts.find(p => p.id == productIdFromUrl);
-                        if (product) {
-                            showProductDetailPage(product);
-                        } else {
-                            productDetailContainer.innerHTML = '<p>পণ্যটি পাওয়া যায়নি। <a href="index.html">হোমপেজে ফিরে যান</a></p>';
-                        }
-                    } else if (productGrid && allProducts.length > 0) {
-                        // If on homepage, display all products
-                        displayProducts(allProducts);
-                    } else if (productGrid) {
-                        productGrid.innerHTML = '<p>কোনো প্রোডাক্ট পাওয়া যায়নি।</p>';
-                    }
-                }
-            });
-        } catch (error) {
-            console.error('Failed to fetch products:', error);
+    if (productId) {
+        // Edit existing product
+        const productRef = productsCollection.doc(productId);
+        const data = { name, price, description };
+        if (imageFile) {
+            const storageRef = storage.ref(`products/${productId}-${imageFile.name}`);
+            await storageRef.put(imageFile);
+            data.imageUrl = await storageRef.getDownloadURL();
         }
-    };
+        await productRef.update(data);
+    } else {
+        // Add new product
+        const newProductRef = productsCollection.doc();
+        const storageRef = storage.ref(`products/${newProductRef.id}-${imageFile.name}`);
+        await storageRef.put(imageFile);
+        const imageUrl = await storageRef.getDownloadURL();
+        await newProductRef.set({ name, price, description, imageUrl, id: newProductRef.id });
+    }
 
-    // Display products on homepage
-    const displayProducts = (productsToDisplay) => {
-        if (!productGrid) return;
-        
-        productGrid.innerHTML = '';
-        if (productsToDisplay.length === 0) {
-            productGrid.innerHTML = '<p>এই ক্যাটাগরিতে কোনো পণ্য নেই।</p>';
-            return;
-        }
+    productForm.reset();
+    submitBtn.textContent = 'পণ্য যোগ করুন';
+    loadAdminProducts();
+    loadProducts();
+});
 
-        productsToDisplay.forEach(product => {
-            if (!product.id || !product.product_name || !product.price || !product.image_url) return;
+// Load products for Admin
+const loadAdminProducts = () => {
+    productsCollection.orderBy('name').onSnapshot(snapshot => {
+        adminProductList.innerHTML = '';
+        snapshot.docs.forEach(doc => {
+            const product = doc.data();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><img src="${product.imageUrl}" alt="${product.name}" class="admin-product-img"></td>
+                <td>${product.name}</td>
+                <td>${product.price} টাকা</td>
+                <td class="action-buttons">
+                    <button class="edit-btn" data-id="${product.id}">এডিট</button>
+                    <button class="delete-btn" data-id="${product.id}">ডিলিট</button>
+                </td>
+            `;
+            adminProductList.appendChild(tr);
+        });
+    });
+};
 
-            const mainImageUrl = GITHUB_IMAGE_BASE_URL + product.image_url;
-            const isOutOfStock = product.stock_status && product.stock_status.toLowerCase() === 'out of stock';
+// Edit and Delete handlers
+adminProductList.addEventListener('click', async (e) => {
+    const id = e.target.dataset.id;
+    if (e.target.classList.contains('delete-btn')) {
+        await productsCollection.doc(id).delete();
+    } else if (e.target.classList.contains('edit-btn')) {
+        const doc = await productsCollection.doc(id).get();
+        const product = doc.data();
+        productForm['product-id'].value = product.id;
+        productForm['product-name'].value = product.name;
+        productForm['product-price'].value = product.price;
+        productForm['product-description'].value = product.description;
+        productForm['product-image'].required = false;
+        submitBtn.textContent = 'পণ্য আপডেট করুন';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
 
+// --- Firebase Firestore (User View) ---
+
+const loadProducts = () => {
+    productsCollection.orderBy('name').onSnapshot(snapshot => {
+        productList.innerHTML = '';
+        snapshot.docs.forEach(doc => {
+            const product = doc.data();
             const productCard = document.createElement('div');
             productCard.classList.add('product-card');
-            productCard.dataset.productId = product.id;
-
             productCard.innerHTML = `
-                <div class="product-image">
-                    <img src="${mainImageUrl}" alt="${product.product_name}" 
-                        onerror="this.onerror=null;this.src='https://placehold.co/400x400?text=No+Image';">
-                    ${isOutOfStock ? `<span class="stock-status">Out of stock</span>` : ''}
-                </div>
+                <img src="${product.imageUrl}" alt="${product.name}">
                 <div class="product-info">
-                    <h3 class="product-name">${product.product_name}</h3>
-                    <div class="product-price">${product.price}৳</div>
+                    <h3>${product.name}</h3>
+                    <p>${product.price} টাকা</p>
+                    <p>${product.description}</p>
+                    <button class="add-to-cart-btn" data-id="${product.id}">কার্টে যোগ করুন</button>
                 </div>
             `;
-            productGrid.appendChild(productCard);
-
-            productCard.addEventListener('click', () => {
-                // Redirect to product detail page instead of showing modal
-                window.location.href = `product.html?id=${product.id}`;
-            });
+            productList.appendChild(productCard);
         });
-    };
+    });
+};
 
-    // Show product detail on its own page
-    const showProductDetailPage = (product) => {
-        if (!productDetailContainer) return;
-        
-        const mainImageUrl = GITHUB_IMAGE_BASE_URL + product.image_url;
-        const otherImages = product.other_images ? product.other_images.split(',').map(img => GITHUB_IMAGE_BASE_URL + img.trim()) : [];
-        const allImages = [mainImageUrl, ...otherImages];
-        
-        // Generate variant options if available
-        const variants = product.variants ? product.variants.split(',').map(v => v.trim()) : ['500g', '1kg'];
-        const variantOptions = variants.map(v => 
-            `<div class="variant-option" data-value="${v}">${v}</div>`
-        ).join('');
-        
-        // Generate related products
-        const relatedProducts = allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
-        const relatedProductsHTML = relatedProducts.map(p => {
-            const imgUrl = GITHUB_IMAGE_BASE_URL + p.image_url;
-            return `
-                <div class="product-card" data-product-id="${p.id}">
-                    <div class="product-image">
-                        <img src="${imgUrl}" alt="${p.product_name}" 
-                            onerror="this.onerror=null;this.src='https://placehold.co/400x400?text=No+Image';">
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name">${p.product_name}</h3>
-                        <div class="product-price">${p.price}৳</div>
-                    </div>
+// Load products initially
+loadProducts();
+
+// --- Cart System ---
+
+productList.addEventListener('click', (e) => {
+    if (e.target.classList.contains('add-to-cart-btn')) {
+        const id = e.target.dataset.id;
+        addToCart(id);
+    }
+});
+
+const addToCart = async (id) => {
+    const doc = await productsCollection.doc(id).get();
+    const product = doc.data();
+    
+    const existingItem = cart.find(item => item.id === product.id);
+    if (existingItem) {
+        existingItem.quantity++;
+    } else {
+        cart.push({ ...product, quantity: 1 });
+    }
+    updateCartUI();
+};
+
+const renderCart = () => {
+    cartItemsContainer.innerHTML = '';
+    let total = 0;
+    if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p>আপনার কার্ট খালি।</p>';
+    } else {
+        cart.forEach(item => {
+            total += item.price * item.quantity;
+            const cartItemEl = document.createElement('div');
+            cartItemEl.classList.add('cart-item');
+            cartItemEl.innerHTML = `
+                <img src="${item.imageUrl}" alt="${item.name}">
+                <div class="item-details">
+                    <h4>${item.name}</h4>
+                    <p>${item.price} টাকা x ${item.quantity}</p>
                 </div>
             `;
-        }).join('');
-
-        productDetailContainer.innerHTML = `
-            <div class="product-detail-premium">
-                <div class="product-detail-images">
-                    <img id="main-product-image" class="main-image" src="${allImages[0]}" alt="${product.product_name}">
-                    ${allImages.length > 1 ? `
-                        <div class="thumbnail-images">
-                            ${allImages.map((img, i) => `<img class="thumbnail ${i===0?'active':''}" src="${img}" data-img-url="${img}">`).join('')}
-                        </div>` : ''}
-                </div>
-                
-                <div class="product-detail-info">
-                    <h2 class="product-title">${product.product_name}</h2>
-                    
-                    <div class="product-meta">
-                        <div class="meta-item">
-                            <strong>SKU:</strong> <span>${product.sku || 'N/A'}</span>
-                        </div>
-                        <div class="meta-item">
-                            <strong>Category:</strong> <span>${product.category || 'N/A'}</span>
-                        </div>
-                        <div class="meta-item">
-                            <strong>Status:</strong> 
-                            <span class="${product.stock_status === 'In Stock' ? 'in-stock' : 'out-of-stock'}">
-                                ${product.stock_status || 'In Stock'}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="product-price-section">
-                        <div class="price-main">${product.price}৳</div>
-                        ${product.price_range ? `<div class="price-range">${product.price_range}</div>` : ''}
-                    </div>
-                    
-                    <div class="variant-selector">
-                        <label class="variant-label">Weight / Variant:</label>
-                        <div class="variant-options">
-                            ${variantOptions}
-                        </div>
-                    </div>
-                    
-                    <div class="quantity-selector">
-                        <span class="quantity-label">Quantity:</span>
-                        <div class="quantity-controls">
-                            <button class="quantity-btn minus">-</button>
-                            <input type="number" class="quantity-input" value="1" min="1">
-                            <button class="quantity-btn plus">+</button>
-                        </div>
-                    </div>
-                    
-                    <div class="order-buttons">
-                        <button class="whatsapp-order-btn" id="whatsapp-order-btn">
-                            <i class="fab fa-whatsapp"></i> WhatsApp Order
-                        </button>
-                        <button class="messenger-order-btn" id="messenger-order-btn">
-                            <i class="fab fa-facebook-messenger"></i> Messenger Order
-                        </button>
-                    </div>
-                    
-                    <div class="product-description">
-                        <h3 class="description-title">Product Description</h3>
-                        <div class="description-content">
-                            ${product.description || 'বিবরণ পাওয়া যায়নি।'}
-                        </div>
-                    </div>
-                </div>
-                
-                ${relatedProducts.length > 0 ? `
-                <div class="related-products">
-                    <h3 class="related-title">Related Products</h3>
-                    <div class="related-grid">
-                        ${relatedProductsHTML}
-                    </div>
-                </div>
-                ` : ''}
-                
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="index.html" class="order-btn" style="display: inline-block; width: auto; padding: 10px 20px;">
-                        <i class="fas fa-arrow-left"></i> সকল পণ্য দেখুন
-                    </a>
-                </div>
-            </div>
-        `;
-        
-        // Thumbnails functionality
-        document.querySelectorAll('.thumbnail').forEach(thumb => {
-            thumb.addEventListener('click', e => {
-                document.getElementById('main-product-image').src = e.target.dataset.imgUrl;
-                document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-            });
+            cartItemsContainer.appendChild(cartItemEl);
         });
+    }
+    cartTotalSpan.textContent = total;
+};
 
-        // Variant selection
-        const variantOptionsEl = document.querySelectorAll('.variant-option');
-        if (variantOptionsEl.length > 0) {
-            variantOptionsEl[0].classList.add('selected');
-            
-            variantOptionsEl.forEach(option => {
-                option.addEventListener('click', () => {
-                    variantOptionsEl.forEach(o => o.classList.remove('selected'));
-                    option.classList.add('selected');
-                });
-            });
-        }
+const updateCartUI = () => {
+    cartCountSpan.textContent = cart.length;
+    renderCart();
+};
 
-        // Quantity controls
-        const quantityInput = document.querySelector('.quantity-input');
-        document.querySelector('.quantity-btn.plus').addEventListener('click', () => {
-            quantityInput.value = parseInt(quantityInput.value) + 1;
-        });
-        
-        document.querySelector('.quantity-btn.minus').addEventListener('click', () => {
-            if (parseInt(quantityInput.value) > 1) {
-                quantityInput.value = parseInt(quantityInput.value) - 1;
-            }
-        });
-
-        // WhatsApp order button
-        document.querySelector('#whatsapp-order-btn').addEventListener('click', () => {
-            const selectedVariant = document.querySelector('.variant-option.selected')?.dataset.value || '';
-            const quantity = quantityInput.value;
-            showOrderForm(product, selectedVariant, quantity);
-        });
-
-        // Messenger order button
-        document.querySelector('#messenger-order-btn').addEventListener('click', () => {
-            const selectedVariant = document.querySelector('.variant-option.selected')?.dataset.value || '';
-            const quantity = quantityInput.value;
-            const productNameWithVariant = `${product.product_name} ${selectedVariant}`;
-            
-            // Open Facebook Messenger with pre-filled message
-            const msg = `I want to order: ${productNameWithVariant} (Quantity: ${quantity})`;
-            window.open(`https://m.me/61578353266944?text=${encodeURIComponent(msg)}`, '_blank');
-        });
-
-        // Related products click event
-        document.querySelectorAll('.related-grid .product-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const productId = card.dataset.productId;
-                // Redirect to the related product's detail page
-                window.location.href = `product.html?id=${productId}`;
-            });
-        });
-    };
-
-    // Show product detail in modal (for homepage)
-    const showProductDetailModal = (product) => {
-        if (!productDetailModal || !productDetailContainer) return;
-        
-        const mainImageUrl = GITHUB_IMAGE_BASE_URL + product.image_url;
-        const otherImages = product.other_images ? product.other_images.split(',').map(img => GITHUB_IMAGE_BASE_URL + img.trim()) : [];
-        const allImages = [mainImageUrl, ...otherImages];
-        
-        // Generate variant options if available
-        const variants = product.variants ? product.variants.split(',').map(v => v.trim()) : ['500g', '1kg'];
-        const variantOptions = variants.map(v => 
-            `<div class="variant-option" data-value="${v}">${v}</div>`
-        ).join('');
-        
-        // Generate related products
-        const relatedProducts = allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
-        const relatedProductsHTML = relatedProducts.map(p => {
-            const imgUrl = GITHUB_IMAGE_BASE_URL + p.image_url;
-            return `
-                <div class="product-card" data-product-id="${p.id}">
-                    <div class="product-image">
-                        <img src="${imgUrl}" alt="${p.product_name}" 
-                            onerror="this.onerror=null;this.src='https://placehold.co/400x400?text=No+Image';">
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name">${p.product_name}</h3>
-                        <div class
+document.getElementById('checkout-btn').addEventListener('click', () => {
+    alert('চেকআউট সফল হয়েছে! ধন্যবাদ।');
+    cart = [];
+    updateCartUI();
+    showSection('products-section');
+});
