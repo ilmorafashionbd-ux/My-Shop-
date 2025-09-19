@@ -67,14 +67,12 @@ function showModal(htmlContent, modalId){
   const id = modalId || 'product-modal';
   const modal = document.getElementById(id);
   if(!modal) return;
-  const inner = modal.querySelector('.modal-card > #'+(id==='product-modal' ? 'product-modal-inner' : 'cart-inner'));
-  // Instead of selecting inner generically, we replace inner HTML appropriately:
   if(id === 'product-modal'){
     const pm = modal.querySelector('#product-modal-inner');
-    pm.innerHTML = htmlContent;
+    if(pm) pm.innerHTML = htmlContent;
   } else if(id === 'cart-modal'){
     const cm = modal.querySelector('#cart-inner');
-    cm.innerHTML = htmlContent;
+    if(cm) cm.innerHTML = htmlContent;
   }
   modal.style.display = 'flex';
 }
@@ -169,11 +167,15 @@ async function initIndexPage(){
       </div>
     `;
     showModal(html,'product-modal');
-    document.getElementById('modal-addcart').addEventListener('click', ()=>{
-      addToCartFromProduct(p);
-      closeModal('product-modal');
-      alert('Added to cart');
-    });
+    // attach after modal shown
+    setTimeout(()=>{
+      const btn = document.getElementById('modal-addcart');
+      if(btn) btn.addEventListener('click', ()=>{
+        addToCartFromProduct(p);
+        closeModal('product-modal');
+        alert('Added to cart');
+      });
+    }, 50);
   }
 
   function addToCartFromProduct(p){
@@ -215,24 +217,28 @@ async function initIndexPage(){
 
     // attach handlers
     const cm = document.getElementById('cart-inner');
-    cm.querySelectorAll('button[data-op]').forEach(b=>{
-      b.addEventListener('click', ()=>{
-        const op = b.dataset.op; const idx = Number(b.dataset.idx);
-        const cart = getCart();
-        if(op==='inc'){ cart[idx].qty = (cart[idx].qty||1) + 1; saveCart(cart); renderCartModal(); }
-        if(op==='dec'){ cart[idx].qty = Math.max(1,(cart[idx].qty||1)-1); saveCart(cart); renderCartModal(); }
-        if(op==='rm'){ cart.splice(idx,1); saveCart(cart); renderCartModal(); }
+    if(cm){
+      cm.querySelectorAll('button[data-op]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const op = b.dataset.op; const idx = Number(b.dataset.idx);
+          const cart = getCart();
+          if(op==='inc'){ cart[idx].qty = (cart[idx].qty||1) + 1; saveCart(cart); renderCartModal(); }
+          if(op==='dec'){ cart[idx].qty = Math.max(1,(cart[idx].qty||1)-1); saveCart(cart); renderCartModal(); }
+          if(op==='rm'){ cart.splice(idx,1); saveCart(cart); renderCartModal(); }
+        });
       });
-    });
+    }
     const checkoutBtn = document.getElementById('checkout-btn');
-    checkoutBtn.addEventListener('click', ()=>{
-      const cart = getCart();
-      if(cart.length===0){ alert('Cart is empty'); return; }
-      let msg = 'Order: ';
-      cart.forEach(it => { msg += `${it.name} x${it.qty} (${it.price}৳), `; });
-      msg += `Total: ${total}৳`;
-      window.open(`https://wa.me/8801778095805?text=${encodeURIComponent(msg)}`, '_blank');
-    });
+    if(checkoutBtn){
+      checkoutBtn.addEventListener('click', ()=>{
+        const cart = getCart();
+        if(cart.length===0){ alert('Cart is empty'); return; }
+        let msg = 'Order: ';
+        cart.forEach(it => { msg += `${it.name} x${it.qty} (${it.price}৳), `; });
+        msg += `Total: ${total}৳`;
+        window.open(`https://wa.me/8801778095805?text=${encodeURIComponent(msg)}`, '_blank');
+      });
+    }
   }
 
   // initial cart count
@@ -252,90 +258,147 @@ async function initAdminPage(){
   const productsList = $('#admin-products-list');
   const clearBtn = $('#btn-clear-form');
 
+  // 🔹 Register form elements (new)
+  const showRegisterBtn = $('#show-register-btn');
+  const registerForm = $('#register-form');
+  const cancelRegisterBtn = $('#cancel-register-btn');
+
+  // Optional: set a secret code to prevent open registration (leave '' to allow)
+  const REGISTER_SECRET = "ILMORA_ADMIN_2025"; // <-- যদি চান সিক্রেট লাগান
+
+  if(showRegisterBtn){
+    showRegisterBtn.addEventListener('click', ()=>{
+      if(registerForm) registerForm.style.display = 'block';
+      showRegisterBtn.style.display = 'none';
+      // scroll into view
+      setTimeout(()=> { if(registerForm) registerForm.scrollIntoView({behavior:'smooth', block:'center'}); }, 120);
+    });
+  }
+  if(cancelRegisterBtn){
+    cancelRegisterBtn.addEventListener('click', ()=>{
+      if(registerForm) registerForm.style.display = 'none';
+      if(showRegisterBtn) showRegisterBtn.style.display = 'inline-block';
+      if(registerForm) registerForm.reset();
+    });
+  }
+  if(registerForm){
+    registerForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = $('#reg-email').value.trim();
+      const pass = $('#reg-password').value;
+      const secret = $('#reg-secret').value.trim();
+      if(REGISTER_SECRET && secret !== REGISTER_SECRET){
+        alert('সিক্রেট কোড ভুল।');
+        return;
+      }
+      try{
+        await auth.createUserWithEmailAndPassword(email, pass);
+        alert('রেজিস্ট্রেশন সফল এবং স্বয়ংক্রিয়ভাবে লগইন হয়েছে।');
+        registerForm.reset();
+        if(registerForm) registerForm.style.display='none';
+        if(showRegisterBtn) showRegisterBtn.style.display='none';
+      }catch(err){
+        console.error(err);
+        if(err && err.code === 'auth/email-already-in-use'){
+          alert('এই ইমেইল ইতোমধ্যেই আছে। লগইন করুন।');
+        } else if(err && err.code === 'auth/weak-password'){
+          alert('পাসওয়ার্ড দুর্বল (6+ অক্ষর লাগবে)।');
+        } else {
+          alert('রেজিস্ট্রেশন সমস্যা: ' + (err.message || err.code || 'Unknown error'));
+        }
+      }
+    });
+  }
+
   // Auth state
   auth.onAuthStateChanged(user=>{
     if(user){
       // show admin UI
-      loginSection.style.display = 'none';
-      adminSection.style.display = 'block';
-      signoutBtn.style.display = 'inline-block';
+      if(loginSection) loginSection.style.display = 'none';
+      if(adminSection) adminSection.style.display = 'block';
+      if(signoutBtn) signoutBtn.style.display = 'inline-block';
       loadAdminProducts();
     } else {
-      loginSection.style.display = 'block';
-      adminSection.style.display = 'none';
-      signoutBtn.style.display = 'none';
+      if(loginSection) loginSection.style.display = 'block';
+      if(adminSection) adminSection.style.display = 'none';
+      if(signoutBtn) signoutBtn.style.display = 'none';
     }
   });
 
   // login submit
-  loginForm.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const email = loginEmail.value.trim();
-    const pass = loginPassword.value;
-    try{
-      await auth.signInWithEmailAndPassword(email, pass);
-      alert('লগইন সফল');
-      loginForm.reset();
-    }catch(err){
-      console.error(err);
-      alert('লগইন সমস্যা: ' + err.message);
-    }
-  });
-
-  // signout
-  signoutBtn.addEventListener('click', ()=> auth.signOut());
-
-  // product add
-  productForm.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const name = $('#p-name').value.trim();
-    const price = $('#p-price').value.trim();
-    const sku = $('#p-sku').value.trim();
-    const category = $('#p-category').value.trim();
-    const desc = $('#p-desc').value.trim();
-    const fileEl = $('#p-image');
-    if(!name || !price){
-      alert('প্রোডাক্ট নাম ও মূল্য দিন');
-      return;
-    }
-    let imageUrl = '';
-    if(fileEl.files && fileEl.files[0]){
+  if(loginForm){
+    loginForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = loginEmail.value.trim();
+      const pass = loginPassword.value;
       try{
-        imageUrl = await uploadToCloudinary(fileEl.files[0]);
+        await auth.signInWithEmailAndPassword(email, pass);
+        alert('লগইন সফল');
+        loginForm.reset();
       }catch(err){
         console.error(err);
-        alert('ছবি আপলোডে সমস্যা: ' + err.message);
+        alert('লগইন সমস্যা: ' + (err.message || err.code || 'Unknown error'));
+      }
+    });
+  }
+
+  // signout
+  if(signoutBtn) signoutBtn.addEventListener('click', ()=> auth.signOut());
+
+  // product add
+  if(productForm){
+    productForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = $('#p-name').value.trim();
+      const price = $('#p-price').value.trim();
+      const sku = $('#p-sku').value.trim();
+      const category = $('#p-category').value.trim();
+      const desc = $('#p-desc').value.trim();
+      const fileEl = $('#p-image');
+      if(!name || !price){
+        alert('প্রোডাক্ট নাম ও মূল্য দিন');
         return;
       }
-    } else {
-      // optional: default placeholder
-      imageUrl = 'https://via.placeholder.com/600x400?text=No+Image';
-    }
+      let imageUrl = '';
+      if(fileEl && fileEl.files && fileEl.files[0]){
+        try{
+          imageUrl = await uploadToCloudinary(fileEl.files[0]);
+        }catch(err){
+          console.error(err);
+          alert('ছবি আপলোডে সমস্যা: ' + err.message);
+          return;
+        }
+      } else {
+        // optional: default placeholder
+        imageUrl = 'https://via.placeholder.com/600x400?text=No+Image';
+      }
 
-    try{
-      await db.collection('products').add({
-        product_name: name,
-        price: price,
-        sku: sku,
-        category: category,
-        description: desc,
-        imageUrl: imageUrl,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      alert('Product saved');
-      productForm.reset();
-      loadAdminProducts();
-    }catch(err){
-      console.error(err);
-      alert('Save error: ' + err.message);
-    }
-  });
+      try{
+        await db.collection('products').add({
+          product_name: name,
+          price: price,
+          sku: sku,
+          category: category,
+          description: desc,
+          imageUrl: imageUrl,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Product saved');
+        productForm.reset();
+        loadAdminProducts();
+      }catch(err){
+        console.error(err);
+        alert('Save error: ' + err.message);
+      }
+    });
+  }
 
   // clear form
-  clearBtn.addEventListener('click', ()=> productForm.reset());
+  if(clearBtn) clearBtn.addEventListener('click', ()=> productForm.reset());
 
   // load products in admin
   async function loadAdminProducts(){
+    if(!productsList) return;
     productsList.innerHTML = '<div>Loading...</div>';
     try{
       const snap = await db.collection('products').orderBy('createdAt','desc').get();
@@ -394,7 +457,8 @@ async function initAdminPage(){
       });
 
       // modify submit handler to support edit mode
-      productForm.removeEventListener('submit', productForm.__submitHandler);
+      // Remove any previous custom handler if exists
+      try{ productForm.removeEventListener('submit', productForm.__submitHandler); }catch(e){}
       const submitHandler = async function(e){
         e.preventDefault();
         const editId = productForm.dataset.editId;
@@ -406,7 +470,7 @@ async function initAdminPage(){
         const fileEl = $('#p-image');
 
         let imageUrl = '';
-        if(fileEl.files && fileEl.files[0]){
+        if(fileEl && fileEl.files && fileEl.files[0]){
           try{ imageUrl = await uploadToCloudinary(fileEl.files[0]); }catch(err){ alert('Upload failed'); return; }
         }
 
