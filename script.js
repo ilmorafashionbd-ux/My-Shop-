@@ -1,243 +1,127 @@
-// আপনার Firebase কনফিগারেশন এখানে যোগ করা হয়েছে
+// আপনার Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyBUp8ZeggaDukSvToXeckeTyy09bX6_0x",
+  apiKey: "AIzaSyBUpr0ZmggaDukSVIoXeckeTVy09bK6_0s",
   authDomain: "my-shop-app-15b82.firebaseapp.com",
   projectId: "my-shop-app-15b82",
-  storageBucket: "my-shop-app-15b82.appspot.com",
+  storageBucket: "my-shop-app-15b82.firebasestorage.app",
   messagingSenderId: "343254203665",
-  appId: "1:343254203665:web:ebeaa6c96837384a5a0a00"
+  appId: "1:343254203665:web:ebeaa0c96837384a8ba0b0"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-const productsCollection = db.collection('products');
+// Firebase SDK ইম্পোর্ট করা
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// DOM Elements
-const productsSection = document.getElementById('products-section');
-const adminPanel = document.getElementById('admin-panel');
-const cartSection = document.getElementById('cart-section');
-const adminLoginBtn = document.querySelector('.admin-login-btn');
-const adminLogoutBtn = document.querySelector('.admin-logout-btn');
-const loginForm = document.getElementById('login-form');
-const adminDashboard = document.getElementById('admin-dashboard');
-const adminLoginContainer = document.getElementById('admin-login-form');
-const productForm = document.getElementById('product-form');
-const productList = document.getElementById('product-list');
-const adminProductList = document.getElementById('admin-product-list');
-const cartCountSpan = document.getElementById('cart-count');
-const cartItemsContainer = document.getElementById('cart-items');
-const cartTotalSpan = document.getElementById('cart-total');
-const submitBtn = document.getElementById('submit-btn');
+// Firebase এবং Firestore initialize করা
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-let cart = [];
+// আপনার Cloudinary তথ্য
+const CLOUDINARY_CLOUD_NAME = "durtzerpq";
+const CLOUDINARY_UPLOAD_PRESET = "product_images";
 
-// --- Page Navigation and UI Management ---
+// ফ্রন্ট-এন্ড (index.html) এর জন্য কোড
+document.addEventListener('DOMContentLoaded', () => {
+    const productGrid = document.getElementById('product-grid');
+    const categoryItems = document.querySelectorAll('.category-item');
 
-function showSection(sectionId) {
-    const sections = [productsSection, adminPanel, cartSection];
-    sections.forEach(sec => sec.style.display = 'none');
-    document.getElementById(sectionId).style.display = 'block';
+    async function fetchProducts(category = 'all') {
+        productGrid.innerHTML = '<h2>Loading products...</h2>';
+        
+        let productsRef = collection(db, "products");
+        let q;
+
+        if (category === 'all') {
+            q = productsRef;
+        } else {
+            q = query(productsRef, where("category", "==", category));
+        }
+
+        try {
+            const querySnapshot = await getDocs(q);
+            productGrid.innerHTML = '';
+            querySnapshot.forEach((doc) => {
+                const product = doc.data();
+                const productCard = document.createElement('div');
+                productCard.classList.add('product-card');
+                productCard.innerHTML = `
+                    <div class="product-image">
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-price">৳${product.price}</p>
+                        <button class="order-btn">অর্ডার করুন</button>
+                    </div>
+                `;
+                productGrid.appendChild(productCard);
+            });
+        } catch (e) {
+            console.error("Error fetching documents: ", e);
+            productGrid.innerHTML = '<h2>Failed to load products.</h2>';
+        }
+    }
+
+    categoryItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const category = item.getAttribute('data-category');
+            fetchProducts(category);
+        });
+    });
+
+    fetchProducts();
+});
+
+// অ্যাডমিন প্যানেল (admin.html) এর জন্য কোড
+if (document.getElementById('product-upload-form')) {
+    const productUploadForm = document.getElementById('product-upload-form');
+
+    productUploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const productName = document.getElementById('productName').value;
+        const productPrice = document.getElementById('productPrice').value;
+        const productDescription = document.getElementById('productDescription').value;
+        const productImageFile = document.getElementById('productImage').files[0];
+        const productCategory = document.getElementById('productCategory').value;
+
+        // বাটনের টেক্সট পরিবর্তন করা
+        const submitBtn = productUploadForm.querySelector('button');
+        submitBtn.textContent = 'আপলোড হচ্ছে...';
+        submitBtn.disabled = true;
+
+        try {
+            // Cloudinary-তে ছবি আপলোড করা
+            const formData = new FormData();
+            formData.append('file', productImageFile);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const cloudinaryData = await cloudinaryResponse.json();
+            const imageUrl = cloudinaryData.secure_url;
+
+            // Firebase-এ ডেটা সংরক্ষণ করা
+            await addDoc(collection(db, "products"), {
+                name: productName,
+                price: productPrice,
+                description: productDescription,
+                imageUrl: imageUrl,
+                category: productCategory
+            });
+
+            alert("পণ্য সফলভাবে আপলোড হয়েছে!");
+            productUploadForm.reset();
+
+        } catch (e) {
+            console.error("পণ্য আপলোডে সমস্যা হয়েছে: ", e);
+            alert("পণ্য আপলোডে সমস্যা হয়েছে।");
+        } finally {
+            submitBtn.textContent = 'পণ্য আপলোড করুন';
+            submitBtn.disabled = false;
+        }
+    });
 }
-
-document.querySelector('.view-products-btn').addEventListener('click', () => {
-    showSection('products-section');
-    loadProducts();
-});
-adminLoginBtn.addEventListener('click', () => showSection('admin-panel'));
-document.querySelector('.cart-btn').addEventListener('click', () => {
-    showSection('cart-section');
-    renderCart();
-});
-adminLogoutBtn.addEventListener('click', () => auth.signOut());
-
-// --- Firebase Authentication ---
-
-auth.onAuthStateChanged(user => {
-    if (user && user.email === 'admin@example.com') { // এখানে আপনার অ্যাডমিন ইমেইল পরিবর্তন করুন
-        adminLoginBtn.style.display = 'none';
-        adminLogoutBtn.style.display = 'inline-block';
-        adminLoginContainer.style.display = 'none';
-        adminDashboard.style.display = 'block';
-        showSection('admin-panel');
-        loadAdminProducts();
-    } else {
-        adminLoginBtn.style.display = 'inline-block';
-        adminLogoutBtn.style.display = 'none';
-        adminDashboard.style.display = 'none';
-        adminLoginContainer.style.display = 'block';
-        if (productsSection.style.display !== 'block' && cartSection.style.display !== 'block') {
-            showSection('products-section');
-        }
-    }
-});
-
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = loginForm['login-email'].value;
-    const password = loginForm['login-password'].value;
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-    } catch (error) {
-        document.getElementById('login-error-message').textContent = 'লগইন ব্যর্থ হয়েছে।';
-    }
-});
-
-// --- Firebase Firestore & Storage (Admin Panel) ---
-
-productForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = productForm['product-name'].value;
-    const price = parseFloat(productForm['product-price'].value);
-    const description = productForm['product-description'].value;
-    const imageFile = productForm['product-image'].files[0];
-    const productId = productForm['product-id'].value;
-
-    if (productId) {
-        // Edit existing product
-        const productRef = productsCollection.doc(productId);
-        const data = { name, price, description };
-        if (imageFile) {
-            const storageRef = storage.ref(`products/${productId}-${imageFile.name}`);
-            await storageRef.put(imageFile);
-            data.imageUrl = await storageRef.getDownloadURL();
-        }
-        await productRef.update(data);
-    } else {
-        // Add new product
-        const newProductRef = productsCollection.doc();
-        const storageRef = storage.ref(`products/${newProductRef.id}-${imageFile.name}`);
-        await storageRef.put(imageFile);
-        const imageUrl = await storageRef.getDownloadURL();
-        await newProductRef.set({ name, price, description, imageUrl, id: newProductRef.id });
-    }
-
-    productForm.reset();
-    submitBtn.textContent = 'পণ্য যোগ করুন';
-    loadAdminProducts();
-    loadProducts();
-});
-
-// Load products for Admin
-const loadAdminProducts = () => {
-    productsCollection.orderBy('name').onSnapshot(snapshot => {
-        adminProductList.innerHTML = '';
-        snapshot.docs.forEach(doc => {
-            const product = doc.data();
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><img src="${product.imageUrl}" alt="${product.name}" class="admin-product-img"></td>
-                <td>${product.name}</td>
-                <td>${product.price} টাকা</td>
-                <td class="action-buttons">
-                    <button class="edit-btn" data-id="${product.id}">এডিট</button>
-                    <button class="delete-btn" data-id="${product.id}">ডিলিট</button>
-                </td>
-            `;
-            adminProductList.appendChild(tr);
-        });
-    });
-};
-
-// Edit and Delete handlers
-adminProductList.addEventListener('click', async (e) => {
-    const id = e.target.dataset.id;
-    if (e.target.classList.contains('delete-btn')) {
-        await productsCollection.doc(id).delete();
-    } else if (e.target.classList.contains('edit-btn')) {
-        const doc = await productsCollection.doc(id).get();
-        const product = doc.data();
-        productForm['product-id'].value = product.id;
-        productForm['product-name'].value = product.name;
-        productForm['product-price'].value = product.price;
-        productForm['product-description'].value = product.description;
-        productForm['product-image'].required = false;
-        submitBtn.textContent = 'পণ্য আপডেট করুন';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
-
-// --- Firebase Firestore (User View) ---
-
-const loadProducts = () => {
-    productsCollection.orderBy('name').onSnapshot(snapshot => {
-        productList.innerHTML = '';
-        snapshot.docs.forEach(doc => {
-            const product = doc.data();
-            const productCard = document.createElement('div');
-            productCard.classList.add('product-card');
-            productCard.innerHTML = `
-                <img src="${product.imageUrl}" alt="${product.name}">
-                <div class="product-info">
-                    <h3>${product.name}</h3>
-                    <p>${product.price} টাকা</p>
-                    <p>${product.description}</p>
-                    <button class="add-to-cart-btn" data-id="${product.id}">কার্টে যোগ করুন</button>
-                </div>
-            `;
-            productList.appendChild(productCard);
-        });
-    });
-};
-
-// Load products initially
-loadProducts();
-
-// --- Cart System ---
-
-productList.addEventListener('click', (e) => {
-    if (e.target.classList.contains('add-to-cart-btn')) {
-        const id = e.target.dataset.id;
-        addToCart(id);
-    }
-});
-
-const addToCart = async (id) => {
-    const doc = await productsCollection.doc(id).get();
-    const product = doc.data();
-    
-    const existingItem = cart.find(item => item.id === product.id);
-    if (existingItem) {
-        existingItem.quantity++;
-    } else {
-        cart.push({ ...product, quantity: 1 });
-    }
-    updateCartUI();
-};
-
-const renderCart = () => {
-    cartItemsContainer.innerHTML = '';
-    let total = 0;
-    if (cart.length === 0) {
-        cartItemsContainer.innerHTML = '<p>আপনার কার্ট খালি।</p>';
-    } else {
-        cart.forEach(item => {
-            total += item.price * item.quantity;
-            const cartItemEl = document.createElement('div');
-            cartItemEl.classList.add('cart-item');
-            cartItemEl.innerHTML = `
-                <img src="${item.imageUrl}" alt="${item.name}">
-                <div class="item-details">
-                    <h4>${item.name}</h4>
-                    <p>${item.price} টাকা x ${item.quantity}</p>
-                </div>
-            `;
-            cartItemsContainer.appendChild(cartItemEl);
-        });
-    }
-    cartTotalSpan.textContent = total;
-};
-
-const updateCartUI = () => {
-    cartCountSpan.textContent = cart.length;
-    renderCart();
-};
-
-document.getElementById('checkout-btn').addEventListener('click', () => {
-    alert('চেকআউট সফল হয়েছে! ধন্যবাদ।');
-    cart = [];
-    updateCartUI();
-    showSection('products-section');
-});
