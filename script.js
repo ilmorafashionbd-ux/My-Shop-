@@ -1,14 +1,12 @@
-// আপনার Firebase কনফিগারেশন কী এখানে বসান
-// এখান থেকে শুরু
+// আপনার Firebase কনফিগারেশন এখানে যোগ করা হয়েছে
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBUp8ZeggaDukSvToXeckeTyy09bX6_0x",
+  authDomain: "my-shop-app-15b82.firebaseapp.com",
+  projectId: "my-shop-app-15b82",
+  storageBucket: "my-shop-app-15b82.appspot.com",
+  messagingSenderId: "343254203665",
+  appId: "1:343254203665:web:ebeaa6c96837384a5a0a00"
 };
-// এখানে শেষ
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -58,7 +56,7 @@ adminLogoutBtn.addEventListener('click', () => auth.signOut());
 // --- Firebase Authentication ---
 
 auth.onAuthStateChanged(user => {
-    if (user && user.email === 'admin@example.com') { // Change this to your admin email
+    if (user && user.email === 'admin@example.com') { // এখানে আপনার অ্যাডমিন ইমেইল পরিবর্তন করুন
         adminLoginBtn.style.display = 'none';
         adminLogoutBtn.style.display = 'inline-block';
         adminLoginContainer.style.display = 'none';
