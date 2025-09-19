@@ -1,98 +1,84 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>অ্যাডমিন প্যানেল | পণ্য আপলোড</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            background-color: #f0f8f2;
-        }
-        .container {
-            max-width: 800px;
-            margin-top: 50px;
-            padding: 30px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #28a745;
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>পণ্য আপলোড করুন</h2>
-        <form id="product-upload-form">
-            <div class="form-group">
-                <label for="productName">পণ্যের নাম</label>
-                <input type="text" id="productName" required>
-            </div>
-            <div class="form-group">
-                <label for="productPrice">দাম</label>
-                <input type="number" id="productPrice" required>
-            </div>
-            <div class="form-group">
-                <label for="productDescription">পণ্যের বর্ণনা</label>
-                <textarea id="productDescription" rows="5" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="productImage">ছবি আপলোড করুন</label>
-                <input type="file" id="productImage" accept="image/*" required>
-            </div>
-            <div class="form-group">
-                <label for="productCategory">ক্যাটাগরি</label>
-                <select id="productCategory" required>
-                    <option value="all">সকল পণ্য</option>
-                    <option value="electronics">ইলেকট্রনিক্স</option>
-                    <option value="mens-fashion">পুরুষদের ফ্যাশন</option>
-                    <option value="womens-fashion">মহিলাদের ফ্যাশন</option>
-                    <option value="books">বই ও স্টেশনারি</option>
-                    <option value="home-living">ঘর ও সজ্জা</option>
-                    <option value="wearables">স্মার্ট গ্যাজেট</option>
-                    <option value="kids-baby">শিশু পণ্য</option>
-                </select>
-            </div>
-            <button type="submit">পণ্য আপলোড করুন</button>
-        </form>
-    </div>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - My Shop</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-    <script type="module" src="script.js"></script>
+  <!-- Firebase compat libs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body data-page="admin">
+
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="index.html">
+        <img src="https://ilmorafashionbd-ux.github.io/My-Bazaar-/images/logo.png" alt="Logo" />
+        <span>Admin Panel</span>
+      </a>
+      <div class="actions">
+        <button id="btn-signout" class="btn small" style="display:none">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap main">
+    <section class="section" id="admin-login-section">
+      <h2 class="section-title">অ্যাডমিন লগইন</h2>
+      <form id="login-form" class="card">
+        <label>ইমেইল</label>
+        <input id="login-email" type="email" placeholder="admin@example.com" required>
+        <label>পাসওয়ার্ড</label>
+        <input id="login-password" type="password" placeholder="password" required>
+        <div style="margin-top:10px;">
+          <button type="submit" class="btn">লগইন</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="section" id="admin-panel-section" style="display:none;">
+      <h2 class="section-title">প্রোডাক্ট ম্যানেজ</h2>
+
+      <div class="card">
+        <h3>নতুন প্রোডাক্ট যোগ করুন</h3>
+        <form id="product-form">
+          <label>প্রোডাক্ট নাম</label>
+          <input id="p-name" required>
+          <label>মূল্য (৳)</label>
+          <input id="p-price" type="number" min="0" required>
+          <label>SKU (PCODE)</label>
+          <input id="p-sku">
+          <label>ক্যাটেগরি</label>
+          <input id="p-category">
+          <label>বর্ণনা</label>
+          <textarea id="p-desc" rows="3"></textarea>
+          <label>ছবি (JPEG/PNG)</label>
+          <input id="p-image" type="file" accept="image/*">
+          <div style="margin-top:10px;">
+            <button type="submit" class="btn">Upload & Save</button>
+            <button id="btn-clear-form" type="button" class="btn alt">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h3>আপলোডকৃত প্রোডাক্টসমূহ</h3>
+        <div id="admin-products-list">লকড অন।</div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div>© Ilmora Fashion - Admin</div>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
 </body>
 </html>
