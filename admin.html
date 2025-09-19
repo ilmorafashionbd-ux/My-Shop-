@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অ্যাডমিন প্যানেল | পণ্য আপলোড</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #f0f8f2;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #28a745;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>পণ্য আপলোড করুন</h2>
+        <form id="product-upload-form">
+            <div class="form-group">
+                <label for="productName">পণ্যের নাম</label>
+                <input type="text" id="productName" required>
+            </div>
+            <div class="form-group">
+                <label for="productPrice">দাম</label>
+                <input type="number" id="productPrice" required>
+            </div>
+            <div class="form-group">
+                <label for="productDescription">পণ্যের বর্ণনা</label>
+                <textarea id="productDescription" rows="5" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="productImage">ছবি আপলোড করুন</label>
+                <input type="file" id="productImage" accept="image/*" required>
+            </div>
+            <div class="form-group">
+                <label for="productCategory">ক্যাটাগরি</label>
+                <select id="productCategory" required>
+                    <option value="all">সকল পণ্য</option>
+                    <option value="electronics">ইলেকট্রনিক্স</option>
+                    <option value="mens-fashion">পুরুষদের ফ্যাশন</option>
+                    <option value="womens-fashion">মহিলাদের ফ্যাশন</option>
+                    <option value="books">বই ও স্টেশনারি</option>
+                    <option value="home-living">ঘর ও সজ্জা</option>
+                    <option value="wearables">স্মার্ট গ্যাজেট</option>
+                    <option value="kids-baby">শিশু পণ্য</option>
+                </select>
+            </div>
+            <button type="submit">পণ্য আপলোড করুন</button>
+        </form>
+    </div>
+
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
