@@ -38,6 +38,24 @@
           <button type="submit" class="btn">লগইন</button>
         </div>
       </form>
+
+      <!-- 🔹 Register form (added) -->
+      <div id="register-wrapper" style="margin-top:12px;">
+        <button id="show-register-btn" class="btn alt" type="button">এডমিন রেজিস্টার করুন</button>
+
+        <form id="register-form" class="card" style="display:none; margin-top:10px;">
+          <label>রেজিস্টার ইমেইল</label>
+          <input id="reg-email" type="email" placeholder="admin@example.com" required>
+          <label>পাসওয়ার্ড</label>
+          <input id="reg-password" type="password" placeholder="password" required>
+          <label>সিক্রেট কোড (যদি থাকে)</label>
+          <input id="reg-secret" type="text" placeholder="Secret code">
+          <div style="margin-top:10px;">
+            <button type="submit" class="btn">রেজিস্টার</button>
+            <button id="cancel-register-btn" type="button" class="btn alt">বাতিল</button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="section" id="admin-panel-section" style="display:none;">
