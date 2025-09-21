@@ -1,6 +1,6 @@
 /*********************************************
   script.js
-  - Handles both index.html (public shop) and admin.html (admin UI)
+  - Handles all pages: index, admin, product-details, and cart
   - Uses Firebase (Auth + Firestore) and Cloudinary (image upload)
 *********************************************/
 
@@ -55,65 +55,36 @@ async function uploadToCloudinary(file){
   const form = new FormData();
   form.append('file', file);
   form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-  // optional: folder limit -> form.append('folder', 'products');
   const res = await fetch(url, { method: 'POST', body: form });
   if(!res.ok) throw new Error('Cloudinary upload failed: '+res.statusText);
   const data = await res.json();
   return data.secure_url || data.url;
 }
 
-/* ============ COMMON UI (modals) ============= */
-function showModal(htmlContent, modalId){
-  const id = modalId || 'product-modal';
-  const modal = document.getElementById(id);
-  if(!modal) return;
-  if(id === 'product-modal'){
-    const pm = modal.querySelector('#product-modal-inner');
-    if(pm) pm.innerHTML = htmlContent;
-  } else if(id === 'cart-modal'){
-    const cm = modal.querySelector('#cart-inner');
-    if(cm) cm.innerHTML = htmlContent;
-  }
-  modal.style.display = 'flex';
+/* ============ COMMON UI ============= */
+function escapeHtml(s){
+  if(!s) return '';
+  return String(s).replace(/[&<>"]/g, (c)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 }
-function closeModal(id='product-modal'){
-  const modal = document.getElementById(id);
-  if(modal) modal.style.display = 'none';
+// This function now handles adding to cart and redirecting
+function addToCart(p, redirect=true){
+    const cart = getCart();
+    const idx = cart.findIndex(i=> i.id === p.id);
+    if(idx>=0){ cart[idx].qty = (cart[idx].qty||1)+1; }
+    else cart.push({ id:p.id, name:p.product_name, price: p.price, imageUrl: p.imageUrl, qty:1 });
+    saveCart(cart);
+    alert('প্রোডাক্ট কার্টে যুক্ত হয়েছে');
+    if(redirect) {
+        window.location.href = 'cart.html';
+    }
 }
-
-/* Close modal event binding (works for both pages) */
-document.addEventListener('click', (e)=>{
-  if(e.target.matches('.modal-close')) {
-    const parent = e.target.closest('.modal');
-    if(parent) parent.style.display='none';
-  }
-  // close when clicking overlay
-  if(e.target.classList && e.target.classList.contains('modal')) {
-    e.target.style.display='none';
-  }
-});
 
 /* ============ INDEX PAGE LOGIC ============= */
 async function initIndexPage(){
-  // elements
   const grid = document.getElementById('product-grid');
   const noProducts = document.getElementById('no-products');
-  const productModal = document.getElementById('product-modal');
-  const productModalClose = document.getElementById('product-modal-close');
-  const cartModal = document.getElementById('cart-modal');
-  const cartClose = document.getElementById('cart-modal-close');
-
-  // close handlers
-  if(productModalClose) productModalClose.onclick = ()=> closeModal('product-modal');
-  if(cartClose) cartClose.onclick = ()=> closeModal('cart-modal');
-
-  // open cart button
-  const cartBtn = document.getElementById('cart-open-btn');
-  if(cartBtn) cartBtn.addEventListener('click', ()=> renderCartModal());
-
   updateCartCount();
 
-  // fetch products once
   try{
     const snapshot = await db.collection('products').orderBy('createdAt','desc').get();
     if(snapshot.empty){
@@ -140,109 +111,135 @@ async function initIndexPage(){
           <div class="small">${escapeHtml(p.category||'')}</div>
           <div class="price">${escapeHtml(p.price||'0')}৳</div>
           <div class="card-actions">
-            <button class="btn view-btn" data-id="${p.id}">বিস্তারিত</button>
+            <a class="btn view-btn" href="product_details.html?id=${p.id}">বিস্তারিত</a>
             <button class="btn alt add-cart-btn" data-id="${p.id}">Add to cart</button>
           </div>
         </div>
       `;
       grid.appendChild(card);
-
-      card.querySelector('.view-btn').addEventListener('click', ()=> openProductModal(p) );
-      card.querySelector('.add-cart-btn').addEventListener('click', ()=> addToCartFromProduct(p) );
-    });
-  }
-
-  function openProductModal(p){
-    const html = `
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <img src="${escapeHtml(p.imageUrl||'')}" style="width:100%;max-height:320px;object-fit:cover;border-radius:8px" alt="${escapeHtml(p.product_name)}">
-        <h3>${escapeHtml(p.product_name)}</h3>
-        <div class="small">SKU: ${escapeHtml(p.sku||'N/A')}</div>
-        <div class="price">${escapeHtml(p.price||'0')}৳</div>
-        <p>${escapeHtml(p.description||'')}</p>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="modal-addcart">Add to cart</button>
-          <a class="btn alt" href="https://wa.me/8801778095805?text=${encodeURIComponent('Interested in '+(p.product_name||''))}" target="_blank">WhatsApp</a>
-        </div>
-      </div>
-    `;
-    showModal(html,'product-modal');
-    // attach after modal shown
-    setTimeout(()=>{
-      const btn = document.getElementById('modal-addcart');
-      if(btn) btn.addEventListener('click', ()=>{
-        addToCartFromProduct(p);
-        closeModal('product-modal');
-        alert('Added to cart');
+      // Add event listener for "Add to cart" button
+      card.querySelector('.add-cart-btn').addEventListener('click', async (e) => {
+          const productId = e.target.dataset.id;
+          try {
+              const doc = await db.collection('products').doc(productId).get();
+              if (doc.exists) {
+                  const productData = { id: doc.id, ...doc.data() };
+                  addToCart(productData, false); // No redirect on index page
+              }
+          } catch (err) {
+              console.error('Error fetching product for cart', err);
+          }
       });
-    }, 50);
-  }
-
-  function addToCartFromProduct(p){
-    const cart = getCart();
-    const idx = cart.findIndex(i=> i.id === p.id);
-    if(idx>=0){ cart[idx].qty = (cart[idx].qty||1)+1; }
-    else cart.push({ id:p.id, name:p.product_name, price: p.price, imageUrl: p.imageUrl, qty:1 });
-    saveCart(cart);
-    alert('প্রোডাক্ট কার্টে যুক্ত হয়েছে');
-  }
-
-  function renderCartModal(){
-    const cart = getCart();
-    if(cart.length===0){
-      showModal('<div style="padding:20px"><h3>আপনার কার্ট খালি</h3></div>','cart-modal'); return;
-    }
-    let html = `<h3>Cart</h3><div class="cart-list">`;
-    let total=0;
-    cart.forEach((it,idx)=>{
-      total += (Number(it.price||0) * (it.qty||1));
-      html += `<div class="cart-item">
-        <img src="${escapeHtml(it.imageUrl||'')}" alt="${escapeHtml(it.name)}">
-        <div style="flex:1">
-          <div><strong>${escapeHtml(it.name)}</strong></div>
-          <div class="small">${escapeHtml(it.price)}৳ x ${escapeHtml(it.qty)}</div>
-          <div class="qty-controls" style="margin-top:8px">
-            <button class="btn small" data-idx="${idx}" data-op="dec">-</button>
-            <button class="btn small" data-idx="${idx}" data-op="inc">+</button>
-            <button class="btn alt small" data-idx="${idx}" data-op="rm">Remove</button>
-          </div>
-        </div>
-      </div>`;
     });
-    html += `</div><div style="margin-top:12px"><strong>Total: ${total}৳</strong></div>
-      <div style="margin-top:12px">
-        <button id="checkout-btn" class="btn">Checkout via WhatsApp</button>
-      </div>`;
-    showModal(html,'cart-modal');
+  }
+}
 
-    // attach handlers
-    const cm = document.getElementById('cart-inner');
-    if(cm){
-      cm.querySelectorAll('button[data-op]').forEach(b=>{
-        b.addEventListener('click', ()=>{
-          const op = b.dataset.op; const idx = Number(b.dataset.idx);
-          const cart = getCart();
-          if(op==='inc'){ cart[idx].qty = (cart[idx].qty||1) + 1; saveCart(cart); renderCartModal(); }
-          if(op==='dec'){ cart[idx].qty = Math.max(1,(cart[idx].qty||1)-1); saveCart(cart); renderCartModal(); }
-          if(op==='rm'){ cart.splice(idx,1); saveCart(cart); renderCartModal(); }
+/* ============ PRODUCT DETAILS PAGE LOGIC ============= */
+async function initProductDetailsPage(){
+    const container = $('#product-details-container');
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+
+    if(!productId){
+        container.innerHTML = `<div style="text-align:center; padding: 20px;">
+            Product not found. <a href="index.html">Go back to home</a>
+        </div>`;
+        return;
+    }
+
+    try {
+        const doc = await db.collection('products').doc(productId).get();
+        if (!doc.exists) {
+            container.innerHTML = `<div style="text-align:center; padding: 20px;">
+                Product not found. <a href="index.html">Go back to home</a>
+            </div>`;
+            return;
+        }
+        const p = { id: doc.id, ...doc.data() };
+        const html = `
+            <div style="display:flex;flex-direction:column;gap:16px">
+                <img src="${escapeHtml(p.imageUrl||'')}" style="width:100%;max-height:450px;object-fit:cover;border-radius:8px" alt="${escapeHtml(p.product_name)}">
+                <h2>${escapeHtml(p.product_name)}</h2>
+                <div class="small">SKU: ${escapeHtml(p.sku||'N/A')}</div>
+                <div class="price" style="font-size:24px">${escapeHtml(p.price||'0')}৳</div>
+                <p>${escapeHtml(p.description||'')}</p>
+                <div style="display:flex;gap:8px">
+                    <button id="add-to-cart-btn" class="btn">Add to cart</button>
+                    <a class="btn alt" href="https://wa.me/8801778095805?text=${encodeURIComponent('Interested in '+(p.product_name||''))}" target="_blank">WhatsApp</a>
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+        
+        $('#add-to-cart-btn').addEventListener('click', () => {
+            addToCart(p);
         });
-      });
-    }
-    const checkoutBtn = document.getElementById('checkout-btn');
-    if(checkoutBtn){
-      checkoutBtn.addEventListener('click', ()=>{
-        const cart = getCart();
-        if(cart.length===0){ alert('Cart is empty'); return; }
-        let msg = 'Order: ';
-        cart.forEach(it => { msg += `${it.name} x${it.qty} (${it.price}৳), `; });
-        msg += `Total: ${total}৳`;
-        window.open(`https://wa.me/8801778095805?text=${encodeURIComponent(msg)}`, '_blank');
-      });
-    }
-  }
 
-  // initial cart count
-  updateCartCount();
+    } catch (err) {
+        console.error('Error fetching product details', err);
+        container.innerHTML = `<div style="text-align:center; padding: 20px;">
+            Error loading product.
+        </div>`;
+    }
+    updateCartCount();
+}
+
+/* ============ CART PAGE LOGIC ============= */
+function initCartPage(){
+    const container = $('#cart-inner');
+    const renderCart = () => {
+        const cart = getCart();
+        if(cart.length===0){
+            container.innerHTML = '<div style="padding:20px"><h3>আপনার কার্ট খালি</h3><p><a href="index.html">পণ্য কেনাকাটা শুরু করুন</a></p></div>';
+            return;
+        }
+        let html = `<h3>Cart</h3><div class="cart-list">`;
+        let total=0;
+        cart.forEach((it,idx)=>{
+            total += (Number(it.price||0) * (it.qty||1));
+            html += `<div class="cart-item">
+                <img src="${escapeHtml(it.imageUrl||'')}" alt="${escapeHtml(it.name)}">
+                <div style="flex:1">
+                    <div><strong>${escapeHtml(it.name)}</strong></div>
+                    <div class="small">${escapeHtml(it.price)}৳ x ${escapeHtml(it.qty)}</div>
+                    <div class="qty-controls" style="margin-top:8px">
+                        <button class="btn small" data-idx="${idx}" data-op="dec">-</button>
+                        <button class="btn small" data-idx="${idx}" data-op="inc">+</button>
+                        <button class="btn alt small" data-idx="${idx}" data-op="rm">Remove</button>
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += `</div><div style="margin-top:12px"><strong>Total: ${total}৳</strong></div>
+            <div style="margin-top:12px">
+                <button id="checkout-btn" class="btn">Checkout via WhatsApp</button>
+            </div>`;
+        container.innerHTML = html;
+
+        // attach handlers
+        container.querySelectorAll('button[data-op]').forEach(b=>{
+            b.addEventListener('click', ()=>{
+                const op = b.dataset.op; const idx = Number(b.dataset.idx);
+                const currentCart = getCart();
+                if(op==='inc'){ currentCart[idx].qty = (currentCart[idx].qty||1) + 1; saveCart(currentCart); renderCart(); }
+                if(op==='dec'){ currentCart[idx].qty = Math.max(1,(currentCart[idx].qty||1)-1); saveCart(currentCart); renderCart(); }
+                if(op==='rm'){ currentCart.splice(idx,1); saveCart(currentCart); renderCart(); }
+            });
+        });
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if(checkoutBtn){
+            checkoutBtn.addEventListener('click', ()=>{
+                const currentCart = getCart();
+                if(currentCart.length===0){ alert('Cart is empty'); return; }
+                let msg = 'Order: ';
+                currentCart.forEach(it => { msg += `${it.name} x${it.qty} (${it.price}৳), `; });
+                msg += `Total: ${total}৳`;
+                window.open(`https://wa.me/8801778095805?text=${encodeURIComponent(msg)}`, '_blank');
+            });
+        }
+    };
+    renderCart();
+    updateCartCount();
 }
 
 /* ============ ADMIN PAGE LOGIC (upload/edit/delete) ============= */
@@ -505,14 +502,10 @@ async function initAdminPage(){
   }
 }
 
-/* ============ Utilities ============= */
-function escapeHtml(s){
-  if(!s) return '';
-  return String(s).replace(/[&<>"]/g, (c)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-}
-
 /* ============ Init based on page ============= */
 document.addEventListener('DOMContentLoaded', ()=>{
   if(page === 'index') initIndexPage();
   if(page === 'admin') initAdminPage();
+  if(page === 'product-details') initProductDetailsPage();
+  if(page === 'cart') initCartPage();
 });
